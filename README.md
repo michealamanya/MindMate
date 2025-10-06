@@ -1,6 +1,6 @@
 🧠 MindMate – AI-Powered Mental Health Support App
 
-“Your mind deserves care too — and MindMate is here to listen.”
+“Your mind deserves care too and MindMate is here to listen.”
 
 🌍 Overview
 
