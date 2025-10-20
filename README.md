@@ -5,7 +5,7 @@
 🌍 Overview
 
 MindMate is a modern Android application designed to support mental well-being through AI-driven mood detection, personalized journaling, and emotional assistance.
-Built with empathy and powered by technology, MindMate enables users to track their emotions, talk with an intelligent chatbot, and receive curated wellness tips — all in one app.
+Built with empathy and powered by technology, MindMate enables users to track their emotions, talk with an intelligent chatbot, and receive curated wellness tips all in one app.
 
 💡 Features
 
