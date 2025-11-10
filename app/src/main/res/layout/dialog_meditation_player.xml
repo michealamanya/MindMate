@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <ImageView
+        android:id="@+id/meditation_image"
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:scaleType="centerCrop"
+        android:contentDescription="Meditation image"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:id="@+id/meditation_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Meditation Title"
+        android:textAppearance="?attr/textAppearanceHeadline6"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:id="@+id/meditation_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Meditation description text"
+        android:textAppearance="?attr/textAppearanceBody2"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:id="@+id/meditation_duration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="10 minutes"
+        android:textAppearance="?attr/textAppearanceCaption"
+        android:layout_marginBottom="8dp"/>
+
+    <SeekBar
+        android:id="@+id/meditation_progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <ImageButton
+            android:id="@+id/play_button"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:src="@android:drawable/ic_media_play"
+            android:background="@drawable/circle_button_bg"
+            android:contentDescription="Play button"/>
+    </LinearLayout>
+
+</LinearLayout>

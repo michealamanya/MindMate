@@ -1,6 +1,6 @@
 <resources>
     <!-- App Name -->
-    <string name="app_name">SignupLogin</string>
+    <string name="app_name">MindMate</string>
 
     <!-- Common -->
     <string name="welcome">Welcome</string>
@@ -34,5 +34,9 @@
     <string name="google_vision_api_key">AIzaSyAZFyIeNPE8Ao6P8Yv-hOh9mgEh_g7FjaE</string>
 
     <string name="default_web_client_id">856968388216-qgjdgtmb3h382koa924p0ohalm76u2pk.apps.googleusercontent.com</string>
+    <string name="as_a_mental_health_support_assistant_respond_supportively_to_this">"As a mental health support assistant, respond supportively to this: "</string>
+    <string name="logout">Logout</string>
+
+    <string name="copyright_text">© 2025 MindMate. All rights reserved.</string>
 
 </resources>

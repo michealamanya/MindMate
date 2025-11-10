@@ -1,54 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Features and Permissions -->
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Add notification permissions -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
+        android:name=".MyApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/img"
+        android:icon="@mipmap/mate"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/img_1"
+        android:roundIcon="@mipmap/out"
         android:supportsRtl="true"
-        android:theme="@style/Theme.SignupLogin">
+        android:theme="@style/Theme.SignupLogin"
+        tools:targetApi="31">
 
-        <!-- Dashboard Activities -->
-        <activity
-            android:name=".DashboardActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ChatActivity"
-            android:exported="false" />
-        <activity
-            android:name=".JournalActivity"
-            android:exported="false" />
-        <activity
-            android:name=".CommunityActivity"
-            android:exported="false" />
-        <activity
-            android:name=".MoreOptionsActivity"
-            android:exported="false" />
-
-        <!-- Authentication Activities -->
-        <activity
-            android:name=".ForgotPasswordActivity"
-            android:exported="false" />
-        <activity
-            android:name=".LoginActivity"
-            android:exported="false" />
-        <activity
-            android:name=".SignupActivity"
-            android:exported="true" />
-
-        <!-- MainActivity should be the launcher -->
+        <!-- Main and Auth Activities -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -58,14 +41,94 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".SignupActivity"
+            android:exported="true" />
+
+        <activity
+            android:name=".LoginActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ForgotPasswordActivity"
+            android:exported="false" />
+
+        <!-- Dashboard and Feature Activities -->
+        <activity
+            android:name=".DashboardActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ChatActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".JournalActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".CommunityActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".GroupChatActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".ResourcesActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".MoreOptionsActivity"
+            android:exported="false" />
+
+        <!-- Admin Activities -->
+        <activity
+            android:name=".admin.AdminDashboardActivity"
+            android:exported="false" />
+        <activity
+            android:name=".admin.ManageUsersActivity"
+            android:exported="false" />
+        <activity
+            android:name=".admin.ManagePostsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".admin.ManageGroupsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".admin.ManageReportsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".admin.AdminAnalyticsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".admin.AdminSettingsActivity"
+            android:exported="false" />
+
         <!-- Notification Service -->
         <service
             android:name=".services.NotificationService"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+
+        <!-- Notification Receiver for Actions -->
+        <receiver
+            android:name=".receivers.NotificationActionReceiver"
+            android:exported="false" />
+
+        <!-- Notification Scheduler Receiver -->
+        <receiver
+            android:name=".receivers.NotificationSchedulerReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="micheal.must.signuplogin.ACTION_SCHEDULED_NOTIFICATION" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
