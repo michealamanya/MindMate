@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="How are you feeling today?"
+        android:textAppearance="?attr/textAppearanceHeadline6"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Rate your mood:"
+        android:textAppearance="?attr/textAppearanceBody1"
+        android:layout_marginBottom="8dp"/>
+
+    <RatingBar
+        android:id="@+id/mood_rating"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:numStars="5"
+        android:stepSize="0.5"
+        android:rating="3"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tell us more about your feelings:"
+        android:textAppearance="?attr/textAppearanceBody1"
+        android:layout_marginBottom="8dp"/>
+
+    <EditText
+        android:id="@+id/feelings_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="How are you feeling? (optional)"
+        android:inputType="textMultiLine"
+        android:minLines="2"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Are you experiencing any of these?"
+        android:textAppearance="?attr/textAppearanceBody1"
+        android:layout_marginBottom="8dp"/>
+
+    <CheckBox
+        android:id="@+id/sleep_checkbox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Sleep difficulties"/>
+
+    <CheckBox
+        android:id="@+id/anxiety_checkbox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Anxiety or worry"/>
+
+    <CheckBox
+        android:id="@+id/energy_checkbox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Low energy or motivation"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/submit_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Submit"
+        style="@style/Widget.MaterialComponents.Button"/>
+
+</LinearLayout>

@@ -15,8 +15,8 @@
         android:id="@+id/iv_profile"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:layout_marginTop="36dp"
-        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginStart="20dp"
         android:src="@drawable/default_avatar"
         app:shapeAppearanceOverlay="@style/CircleImageView"
         app:strokeColor="@color/primary"
@@ -27,16 +27,15 @@
     <!-- Settings Icon -->
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/iv_settings"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:layout_marginTop="36dp"
-        android:layout_marginEnd="48dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="20dp"
         android:src="@drawable/ic_settings"
-        android:padding="6dp"
+        android:padding="8dp"
         app:shapeAppearanceOverlay="@style/CircleImageView"
-        app:strokeColor="@color/gray"
-        app:strokeWidth="1dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
+        android:background="?attr/selectableItemBackground"
+        android:scaleType="centerInside"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
@@ -46,27 +45,30 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Hi there!"
-        android:textSize="24sp"
+        android:textSize="28sp"
         android:textStyle="bold"
         android:textColor="@color/primary"
         android:layout_marginStart="16dp"
-        android:layout_marginEnd="24dp"
+        android:layout_marginEnd="16dp"
         app:layout_constraintStart_toEndOf="@id/iv_profile"
         app:layout_constraintEnd_toStartOf="@id/iv_settings"
-        app:layout_constraintTop_toTopOf="@id/iv_profile"/>
+        app:layout_constraintTop_toTopOf="@id/iv_profile"
+        app:layout_constraintBottom_toBottomOf="@id/iv_profile"
+        android:gravity="center_vertical"/>
 
     <TextView
         android:id="@+id/tv_greeting_subtext"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Let's check in with your mind today."
-        android:textSize="14sp"
+        android:textSize="13sp"
         android:textColor="@color/gray_dark"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="24dp"
-        app:layout_constraintStart_toEndOf="@id/iv_profile"
-        app:layout_constraintEnd_toStartOf="@id/iv_settings"
-        app:layout_constraintTop_toBottomOf="@id/tv_greeting"/>
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/iv_profile"/>
 
     <!-- Scrollable Content -->
     <androidx.core.widget.NestedScrollView
@@ -75,7 +77,7 @@
         android:fillViewport="true"
         app:layout_constraintTop_toBottomOf="@id/tv_greeting_subtext"
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
-        android:layout_marginTop="16dp">
+        android:layout_marginTop="12dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -86,34 +88,37 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/quote_card"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="4dp"
+                android:layout_height="100dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="6dp"
                 android:layout_margin="16dp"
                 android:backgroundTint="@color/info_blue">
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:orientation="horizontal"
-                    android:padding="16dp">
+                    android:padding="20dp"
+                    android:gravity="center_vertical">
 
                     <TextView
                         android:id="@+id/tv_quote_icon"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="💭"
-                        android:textSize="24sp"
-                        android:layout_marginEnd="12dp"/>
+                        android:textSize="28sp"
+                        android:layout_marginEnd="16dp"/>
 
                     <TextView
                         android:id="@+id/tv_daily_quote"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:text="Take a deep breath—you've got this."
-                        android:textSize="16sp"
+                        android:textSize="15sp"
                         android:textColor="@color/white"
-                        android:textStyle="italic"/>
+                        android:textStyle="italic"
+                        android:lineSpacingExtra="2sp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -125,17 +130,18 @@
                 android:orientation="horizontal"
                 android:gravity="center"
                 android:weightSum="3"
-                android:layout_marginTop="16dp">
+                android:layout_marginHorizontal="12dp"
+                android:layout_marginVertical="8dp">
 
                 <!-- Mood Score -->
                 <androidx.cardview.widget.CardView
                     android:id="@+id/mood_card"
                     android:layout_width="0dp"
-                    android:layout_height="140dp"
+                    android:layout_height="150dp"
                     android:layout_weight="1"
-                    app:cardCornerRadius="16dp"
+                    app:cardCornerRadius="18dp"
                     app:cardElevation="8dp"
-                    android:layout_margin="8dp"
+                    android:layout_margin="6dp"
                     android:backgroundTint="@color/primary">
 
                     <LinearLayout
@@ -143,14 +149,14 @@
                         android:layout_height="match_parent"
                         android:orientation="vertical"
                         android:gravity="center"
-                        android:padding="12dp">
+                        android:padding="14dp">
 
                         <FrameLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center">
+                            android:layout_gravity="center"
+                            android:layout_marginBottom="8dp">
 
-                            <!-- Mood Image View -->
                             <com.google.android.material.imageview.ShapeableImageView
                                 android:id="@+id/iv_mood_image"
                                 android:layout_width="48dp"
@@ -161,13 +167,12 @@
                                 app:strokeColor="@color/white"
                                 app:strokeWidth="2dp"/>
 
-                            <!-- Mood Score Emoji -->
                             <TextView
                                 android:id="@+id/tv_mood_score"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="😊"
-                                android:textSize="36sp"/>
+                                android:textSize="40sp"/>
                         </FrameLayout>
 
                         <TextView
@@ -175,17 +180,18 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Mood Score"
-                            android:textSize="14sp"
-                            android:textColor="@color/white"/>
+                            android:textSize="12sp"
+                            android:textColor="@color/white"
+                            android:textStyle="bold"/>
 
                         <com.google.android.material.progressindicator.LinearProgressIndicator
                             android:id="@+id/mood_progress"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
+                            android:layout_height="4dp"
+                            android:layout_marginTop="10dp"
                             android:progress="75"
                             app:trackThickness="4dp"
-                            app:trackColor="@color/white"
+                            app:trackColor="@android:color/white"
                             app:indicatorColor="@color/accent"/>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
@@ -194,11 +200,11 @@
                 <androidx.cardview.widget.CardView
                     android:id="@+id/tips_card"
                     android:layout_width="0dp"
-                    android:layout_height="140dp"
+                    android:layout_height="150dp"
                     android:layout_weight="1"
-                    app:cardCornerRadius="16dp"
+                    app:cardCornerRadius="18dp"
                     app:cardElevation="8dp"
-                    android:layout_margin="8dp"
+                    android:layout_margin="6dp"
                     android:backgroundTint="@color/accent">
 
                     <LinearLayout
@@ -206,14 +212,15 @@
                         android:layout_height="match_parent"
                         android:orientation="vertical"
                         android:gravity="center"
-                        android:padding="12dp">
+                        android:padding="14dp">
 
                         <TextView
                             android:id="@+id/tv_tips_icon"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="💡"
-                            android:textSize="36sp"/>
+                            android:textSize="40sp"
+                            android:layout_marginBottom="4dp"/>
 
                         <TextView
                             android:id="@+id/tv_tips_count"
@@ -229,8 +236,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Daily Tips"
-                            android:textSize="14sp"
-                            android:textColor="@color/white"/>
+                            android:textSize="12sp"
+                            android:textColor="@color/white"
+                            android:textStyle="bold"
+                            android:layout_marginTop="2dp"/>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
@@ -238,11 +247,11 @@
                 <androidx.cardview.widget.CardView
                     android:id="@+id/session_card"
                     android:layout_width="0dp"
-                    android:layout_height="140dp"
+                    android:layout_height="150dp"
                     android:layout_weight="1"
-                    app:cardCornerRadius="16dp"
+                    app:cardCornerRadius="18dp"
                     app:cardElevation="8dp"
-                    android:layout_margin="8dp"
+                    android:layout_margin="6dp"
                     android:backgroundTint="@color/success_green">
 
                     <LinearLayout
@@ -250,14 +259,15 @@
                         android:layout_height="match_parent"
                         android:orientation="vertical"
                         android:gravity="center"
-                        android:padding="12dp">
+                        android:padding="14dp">
 
                         <TextView
                             android:id="@+id/tv_sessions_icon"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="🧘"
-                            android:textSize="36sp"/>
+                            android:textSize="40sp"
+                            android:layout_marginBottom="4dp"/>
 
                         <TextView
                             android:id="@+id/tv_sessions_time"
@@ -273,8 +283,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Today's Session"
-                            android:textSize="14sp"
-                            android:textColor="@color/white"/>
+                            android:textSize="12sp"
+                            android:textColor="@color/white"
+                            android:textStyle="bold"
+                            android:layout_marginTop="2dp"/>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
             </LinearLayout>
@@ -285,15 +297,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="12dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="8dp"
                 android:backgroundTint="@color/primary_dark">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:padding="20dp">
+                    android:padding="20dp"
+                    android:gravity="center_vertical">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -306,7 +319,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Talk to MindMate"
-                            android:textSize="20sp"
+                            android:textSize="18sp"
                             android:textColor="@color/white"
                             android:textStyle="bold"/>
 
@@ -315,17 +328,20 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Ask for guidance, tips, or share your thoughts confidentially."
-                            android:textSize="14sp"
+                            android:textSize="13sp"
                             android:textColor="@color/gray_light"
-                            android:layout_marginTop="8dp"/>
+                            android:layout_marginTop="6dp"
+                            android:lineSpacingExtra="1sp"/>
                     </LinearLayout>
 
                     <ImageView
                         android:id="@+id/iv_chatbot"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
                         android:src="@drawable/ic_chat_bot"
-                        android:layout_gravity="center_vertical"/>
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginStart="12dp"
+                        android:scaleType="centerInside"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -336,18 +352,20 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:weightSum="4"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="16dp"
                 android:paddingHorizontal="8dp">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_checkin"
                     android:layout_width="0dp"
-                    android:layout_height="64dp"
+                    android:layout_height="68dp"
                     android:layout_weight="1"
                     android:text="Check-In"
-                    android:textSize="13sp"
+                    android:textSize="12sp"
                     app:icon="@drawable/ic_checkin"
                     app:iconGravity="top"
+                    app:iconPadding="6dp"
                     android:textColor="@color/white"
                     android:backgroundTint="@color/purple_500"
                     app:cornerRadius="16dp"
@@ -356,12 +374,13 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_journal"
                     android:layout_width="0dp"
-                    android:layout_height="64dp"
+                    android:layout_height="68dp"
                     android:layout_weight="1"
                     android:text="Journal"
-                    android:textSize="13sp"
+                    android:textSize="12sp"
                     app:icon="@drawable/ic_journal"
                     app:iconGravity="top"
+                    app:iconPadding="6dp"
                     android:textColor="@color/white"
                     android:backgroundTint="@color/primary"
                     app:cornerRadius="16dp"
@@ -370,12 +389,13 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_meditation"
                     android:layout_width="0dp"
-                    android:layout_height="64dp"
+                    android:layout_height="68dp"
                     android:layout_weight="1"
                     android:text="Meditation"
-                    android:textSize="13sp"
+                    android:textSize="12sp"
                     app:icon="@drawable/ic_meditation"
                     app:iconGravity="top"
+                    app:iconPadding="6dp"
                     android:textColor="@color/white"
                     android:backgroundTint="@color/info_blue"
                     app:cornerRadius="16dp"
@@ -384,12 +404,13 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/button_resources"
                     android:layout_width="0dp"
-                    android:layout_height="64dp"
+                    android:layout_height="68dp"
                     android:layout_weight="1"
                     android:text="Resources"
-                    android:textSize="13sp"
+                    android:textSize="12sp"
                     app:icon="@drawable/ic_resources"
                     app:iconGravity="top"
+                    app:iconPadding="6dp"
                     android:textColor="@color/white"
                     android:backgroundTint="@color/accent"
                     app:cornerRadius="16dp"
@@ -402,21 +423,20 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Your Mood Trends"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="@color/gray_dark"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"/>
+                android:layout_marginTop="12dp"/>
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/mood_trends_card"
                 android:layout_width="match_parent"
-                android:layout_height="120dp"
+                android:layout_height="130dp"
                 android:layout_margin="16dp"
-                app:cardCornerRadius="16dp"
+                app:cardCornerRadius="18dp"
                 app:cardElevation="4dp">
 
-                <!-- Use a horizontal LinearLayout for day circles -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -436,13 +456,14 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Mon"
-                            android:textSize="12sp"/>
+                            android:textSize="11sp"
+                            android:textColor="@color/gray_dark"/>
                         <View
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:background="@drawable/circle_shape"
                             android:backgroundTint="@color/success_green"
-                            android:layout_margin="4dp"/>
+                            android:layout_margin="6dp"/>
                     </LinearLayout>
 
                     <!-- Tuesday -->
@@ -457,13 +478,14 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Tue"
-                            android:textSize="12sp"/>
+                            android:textSize="11sp"
+                            android:textColor="@color/gray_dark"/>
                         <View
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:background="@drawable/circle_shape"
                             android:backgroundTint="@color/info_blue"
-                            android:layout_margin="4dp"/>
+                            android:layout_margin="6dp"/>
                     </LinearLayout>
 
                     <!-- Wednesday -->
@@ -478,13 +500,14 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Wed"
-                            android:textSize="12sp"/>
+                            android:textSize="11sp"
+                            android:textColor="@color/gray_dark"/>
                         <View
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:background="@drawable/circle_shape"
                             android:backgroundTint="@color/info_blue"
-                            android:layout_margin="4dp"/>
+                            android:layout_margin="6dp"/>
                     </LinearLayout>
 
                     <!-- Thursday -->
@@ -499,13 +522,14 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Thu"
-                            android:textSize="12sp"/>
+                            android:textSize="11sp"
+                            android:textColor="@color/gray_dark"/>
                         <View
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:background="@drawable/circle_shape"
                             android:backgroundTint="@color/warning_yellow"
-                            android:layout_margin="4dp"/>
+                            android:layout_margin="6dp"/>
                     </LinearLayout>
 
                     <!-- Friday -->
@@ -520,13 +544,14 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Fri"
-                            android:textSize="12sp"/>
+                            android:textSize="11sp"
+                            android:textColor="@color/gray_dark"/>
                         <View
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:background="@drawable/circle_shape"
                             android:backgroundTint="@color/success_green"
-                            android:layout_margin="4dp"/>
+                            android:layout_margin="6dp"/>
                     </LinearLayout>
 
                     <!-- Saturday -->
@@ -541,13 +566,14 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Sat"
-                            android:textSize="12sp"/>
+                            android:textSize="11sp"
+                            android:textColor="@color/gray_dark"/>
                         <View
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:background="@drawable/circle_shape"
                             android:backgroundTint="@color/success_green"
-                            android:layout_margin="4dp"/>
+                            android:layout_margin="6dp"/>
                     </LinearLayout>
 
                     <!-- Sunday -->
@@ -562,53 +588,144 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Sun"
-                            android:textSize="12sp"/>
+                            android:textSize="11sp"
+                            android:textColor="@color/gray_dark"/>
                         <View
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:background="@drawable/circle_shape"
                             android:backgroundTint="@color/info_blue"
-                            android:layout_margin="4dp"/>
+                            android:layout_margin="6dp"/>
                     </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Recommended Section -->
-            <TextView
-                android:id="@+id/tv_recommended_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Recommended for You"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/gray_dark"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"/>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_recommended"
+            <!-- Recommended Section with Enhanced Styling -->
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="180dp"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:clipToPadding="false"
-                android:layout_marginBottom="16dp"
-                android:orientation="horizontal"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="8dp">
+
+                <!-- Section Header with Decoration -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="4dp">
+
+                    <TextView
+                        android:id="@+id/tv_recommended_title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Recommended for You"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/gray_dark"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="✨"
+                        android:textSize="20sp"
+                        android:layout_marginStart="8dp"/>
+                </LinearLayout>
+
+                <!-- Subtitle -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Personalized activities just for you"
+                    android:textSize="12sp"
+                    android:textColor="@color/gray"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="12dp"/>
+
+                <!-- RecyclerView with Card Container -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginEnd="12dp"
+                    android:layout_marginBottom="8dp"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp"
+                    android:backgroundTint="@android:color/transparent">
+
+                    <!-- Watery Background Container -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:background="@drawable/watery_background"
+                        android:padding="8dp">
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rv_recommended"
+                            android:layout_width="match_parent"
+                            android:layout_height="200dp"
+                            android:clipToPadding="false"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
+                            android:paddingBottom="12dp"
+                            android:orientation="horizontal"
+                            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Loading Indicator / Scroll Hint -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:paddingBottom="12dp"
+                    android:paddingTop="4dp">
+
+                    <View
+                        android:layout_width="6dp"
+                        android:layout_height="6dp"
+                        android:background="@drawable/dot_indicator"
+                        android:layout_margin="4dp"
+                        android:backgroundTint="@color/primary"/>
+
+                    <View
+                        android:layout_width="6dp"
+                        android:layout_height="6dp"
+                        android:background="@drawable/dot_indicator"
+                        android:layout_margin="4dp"
+                        android:backgroundTint="@color/gray_light"/>
+
+                    <View
+                        android:layout_width="6dp"
+                        android:layout_height="6dp"
+                        android:background="@drawable/dot_indicator"
+                        android:layout_margin="4dp"
+                        android:backgroundTint="@color/gray_light"/>
+                </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Add Floating Action Button for mood capture -->
+    <!-- Floating Action Button -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_capture_mood"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_margin="20dp"
         android:src="@drawable/ic_camera"
         android:contentDescription="Capture mood"
         app:backgroundTint="@color/primary"
         app:tint="@color/white"
         app:fabSize="normal"
+        app:elevation="8dp"
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
         app:layout_constraintEnd_toEndOf="parent"/>
 

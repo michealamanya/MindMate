@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Brand Colors -->
-    <color name="primary">#1976D2</color>          <!-- Used in layouts -->
+    <color name="primary">#0EA5E9</color>
     <color name="primary_dark">#1565C0</color>
     <color name="accent">#FF9800</color>
-
-    <!-- Legacy aliases for compatibility -->
-    <color name="colorPrimary">#1976D2</color>
-    <color name="colorPrimaryDark">#1565C0</color>
-    <color name="colorAccent">#FF9800</color>
 
     <!-- Neutral Colors -->
     <color name="white">#FFFFFFFF</color>
@@ -16,6 +11,7 @@
     <color name="gray_light">#F5F5F5</color>
     <color name="gray">#9E9E9E</color>
     <color name="gray_dark">#424242</color>
+    <color name="grayDark">#424242</color>
 
     <!-- Status Colors -->
     <color name="success_green">#4CAF50</color>
@@ -27,13 +23,29 @@
     <color name="background_light">#FFFFFF</color>
     <color name="background_dark">#121212</color>
 
-    <!-- Button States -->
-    <color name="button_enabled">#1976D2</color>
-    <color name="button_disabled">#B0BEC5</color>
-    <color name="button_pressed">#1565C0</color>
-    <color name="grayDark">#424242</color>
+    <!-- Additional colors -->
     <color name="googleBlue">#4285F4</color>
+    <color name="google_blue">#4285F4</color>
     <color name="purple_500">#6200EE</color>
 
+    <!-- Resource category colors -->
+    <color name="category_crisis">#E53935</color>
+    <color name="category_support_groups">#8E24AA</color>
+    <color name="category_therapy">#43A047</color>
+    <color name="category_self_help">#0288D1</color>
+    <color name="category_youth">#FB8C00</color>
+    <color name="category_support">#607D8B</color>
 
+    <!-- Text and UI colors -->
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+    <color name="divider">#E0E0E0</color>
+    <color name="divider_color">#E5E7EB</color>
+    <color name="ripple_color">#20000000</color>
+
+    <!-- New enhanced UI colors -->
+    <color name="secondary">#06B6D4</color>
+    <color name="info_background">#F0F9FF</color>
+    <color name="white_30_percent">#4DFFFFFF</color>
+    <color name="white_70_percent">#B3FFFFFF</color>
 </resources>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="4dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Category Color Bar -->
+        <View
+            android:id="@+id/category_color_bar"
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:background="@color/primary" />
+
+        <!-- Content -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Title -->
+            <TextView
+                android:id="@+id/tv_resource_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Resource Title"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Description -->
+            <TextView
+                android:id="@+id/tv_resource_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Resource description goes here"
+                android:textSize="14sp"
+                android:textColor="@color/gray_dark"
+                android:layout_marginBottom="12dp"
+                android:maxLines="3"
+                android:ellipsize="end" />
+
+            <!-- Category Chip -->
+            <com.google.android.material.chip.Chip
+                android:id="@+id/tv_resource_category"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Category"
+                android:textSize="12sp"
+                android:layout_marginBottom="8dp"
+                android:checkable="false"
+                app:chipCornerRadius="4dp" />
+
+            <!-- Source -->
+            <TextView
+                android:id="@+id/tv_resource_source"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Source: Website"
+                android:textSize="12sp"
+                android:textColor="@color/gray"
+                android:layout_marginBottom="12dp" />
+
+            <!-- Visit Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_visit_resource"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Visit Resource"
+                app:cornerRadius="8dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>
