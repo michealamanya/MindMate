@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_background">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- App Info Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            android:layout_marginBottom="24dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <ImageView
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@drawable/ic_mindmate_logo"
+                    android:contentDescription="MindMate Logo"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="16dp"
+                    android:scaleType="centerInside" />
+
+                <TextView
+                    android:id="@+id/tv_app_info"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_secondary"
+                    android:gravity="center"
+                    android:lineSpacingExtra="4dp" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Contact & Social Media Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Connect With Me"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary"
+            android:layout_marginBottom="12dp"
+            android:layout_marginStart="8dp" />
+
+        <LinearLayout
+            android:id="@+id/contact_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="24dp">
+
+            <!-- WhatsApp -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_whatsapp"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="WhatsApp: +256 740 470 116"
+                android:textSize="14sp"
+                android:layout_marginBottom="8dp"
+                app:cornerRadius="8dp"
+                app:backgroundTint="#25D366"
+                app:icon="@drawable/ic_whatsapp"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp" />
+
+            <!-- Email -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_email"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="Email: amanyamicheal770@gmail.com"
+                android:textSize="14sp"
+                android:layout_marginBottom="8dp"
+                app:cornerRadius="8dp"
+                app:backgroundTint="@color/primary"
+                app:icon="@drawable/ic_email"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp" />
+
+            <!-- Twitter -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_twitter"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="Twitter: @michealamanya"
+                android:textSize="14sp"
+                android:layout_marginBottom="8dp"
+                app:cornerRadius="8dp"
+                app:backgroundTint="#1DA1F2"
+                app:icon="@drawable/ic_twitter"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp" />
+
+            <!-- GitHub -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_github"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="GitHub: michealamanya"
+                android:textSize="14sp"
+                android:layout_marginBottom="8dp"
+                app:cornerRadius="8dp"
+                app:backgroundTint="#333333"
+                app:icon="@drawable/ic_github"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp" />
+
+            <!-- LinkedIn -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_linkedin"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="LinkedIn: micheal-amanya"
+                android:textSize="14sp"
+                android:layout_marginBottom="8dp"
+                app:cornerRadius="8dp"
+                app:backgroundTint="#0A66C2"
+                app:icon="@drawable/ic_linkedin"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp" />
+
+            <!-- Instagram -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_instagram"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="Instagram: @michealamanya"
+                android:textSize="14sp"
+                app:cornerRadius="8dp"
+                app:backgroundTint="#E1306C"
+                app:icon="@drawable/ic_instagram"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp" />
+
+        </LinearLayout>
+
+        <!-- Help & Support Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Help and Support"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary"
+            android:layout_marginBottom="12dp"
+            android:layout_marginStart="8dp" />
+
+        <!-- Privacy Policy -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_privacy_policy"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="Privacy Policy"
+            android:textSize="14sp"
+            android:layout_marginBottom="8dp"
+            app:cornerRadius="8dp"
+            app:backgroundTint="@color/secondary" />
+
+        <!-- Terms of Service -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_terms_of_service"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="Terms of Service"
+            android:textSize="14sp"
+            android:layout_marginBottom="8dp"
+            app:cornerRadius="8dp"
+            app:backgroundTint="@color/secondary" />
+
+        <!-- FAQ -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_faq"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="Frequently Asked Questions"
+            android:textSize="14sp"
+            app:cornerRadius="8dp"
+            app:backgroundTint="@color/secondary" />
+
+    </LinearLayout>
+
+</ScrollView>
