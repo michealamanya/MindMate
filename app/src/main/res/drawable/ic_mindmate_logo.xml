@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="80dp"
+    android:height="80dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    
+    <!-- Blue background circle -->
+    <path
+        android:fillColor="#0EA5E9"
+        android:pathData="M12,2C6.48,2 2,6.48 2,12s4.48,10 10,10 10,-4.48 10,-10S17.52,2 12,2z" />
+    
+    <!-- White smiley face -->
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M12,4c4.41,0 8,3.59 8,8s-3.59,8 -8,8 -8,-3.59 -8,-8 3.59,-8 8,-8m0,-2C6.48,2 2,6.48 2,12s4.48,10 10,10 10,-4.48 10,-10S17.52,2 12,2z" />
+    
+    <!-- Left eye -->
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M9,10.5c0.83,0 1.5,-0.67 1.5,-1.5s-0.67,-1.5 -1.5,-1.5 -1.5,0.67 -1.5,1.5 0.67,1.5 1.5,1.5z" />
+    
+    <!-- Right eye -->
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M15,10.5c0.83,0 1.5,-0.67 1.5,-1.5s-0.67,-1.5 -1.5,-1.5 -1.5,0.67 -1.5,1.5 0.67,1.5 1.5,1.5z" />
+    
+    <!-- Smile curve -->
+    <path
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M9,15Q12,17 15,15" />
+    
+</vector>

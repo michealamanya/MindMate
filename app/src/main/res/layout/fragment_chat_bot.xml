@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_messages"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:clipToPadding="false"/>
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chip_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_feeling_anxious"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Anxious?" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_need_motivation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Need Motivation?" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_sleep_help"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sleep Help?" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_feeling_down"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Feeling Down?" />
+
+    </com.google.android.material.chip.ChipGroup>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:background="@color/white"
+        android:elevation="4dp">
+
+        <EditText
+            android:id="@+id/et_message"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Type a message..."
+            android:padding="12dp"
+            android:background="@drawable/rounded_edittext_bg"
+            android:layout_marginEnd="8dp"
+            android:textSize="14sp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_send"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Send"
+            android:layout_gravity="center"/>
+
+    </LinearLayout>
+
+</LinearLayout>
