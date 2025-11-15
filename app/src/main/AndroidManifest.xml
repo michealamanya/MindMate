@@ -18,6 +18,8 @@
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!-- Add permissions -->
+    <uses-permission android:name="android.permission.CALL_PHONE" />
 
     <application
         android:name=".MyApplication"
@@ -127,6 +129,21 @@
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="micheal.must.signuplogin.ACTION_SCHEDULED_NOTIFICATION" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Service for background meditation sessions -->
+        <service
+            android:name=".services.MeditationService"
+            android:exported="false" />
+
+        <!-- BroadcastReceiver for network changes -->
+        <receiver
+            android:name=".receivers.NetworkChangeReceiver"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
     </application>

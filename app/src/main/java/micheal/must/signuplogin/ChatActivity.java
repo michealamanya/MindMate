@@ -1,5 +1,6 @@
 package micheal.must.signuplogin;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -115,6 +116,68 @@ public class ChatActivity extends AppCompatActivity {
         @Override
         public int getItemCount() {
             return tabTitles.length;
+        }
+    }
+
+    /**
+     * Show crisis resources with implicit intents
+     */
+    private void showCrisisResources() {
+        androidx.appcompat.app.AlertDialog.Builder builder =
+                new androidx.appcompat.app.AlertDialog.Builder(this);
+
+        builder.setTitle("🆘 Crisis Resources")
+                .setMessage("988 - Suicide & Crisis Lifeline (US)\nAvailable 24/7, Free & Confidential")
+                .setPositiveButton("📞 Call Now", (dialog, which) -> {
+                    callCrisisHelpline();
+                })
+                .setNegativeButton("📱 Text Instead", (dialog, which) -> {
+                    openTextLineImplicit();
+                })
+                .setNeutralButton("🌐 Visit Website", (dialog, which) -> {
+                    openBrowserImplicit("https://988lifeline.org");
+                })
+                .show();
+    }
+
+    /**
+     * Open crisis text line implicitly
+     */
+    private void openTextLineImplicit() {
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(android.net.Uri.parse("https://www.crisistextline.org"));
+            startActivity(intent);
+        } catch (Exception e) {
+            android.widget.Toast.makeText(this, "Could not open", android.widget.Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Call helpline implicitly
+     */
+    private void callCrisisHelpline() {
+        try {
+            Intent intent = new Intent(Intent.ACTION_DIAL);
+            intent.setData(android.net.Uri.parse("tel:988"));
+            startActivity(intent);
+        } catch (Exception e) {
+            android.widget.Toast.makeText(this, "Could not open dialer", android.widget.Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Open browser implicitly
+     */
+    private void openBrowserImplicit(String url) {
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(android.net.Uri.parse(url));
+            startActivity(intent);
+            Log.d(TAG, "✓ Opened browser: " + url);
+        } catch (Exception e) {
+            android.widget.Toast.makeText(this, "Could not open browser", android.widget.Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "Error opening browser: " + e.getMessage());
         }
     }
 }
