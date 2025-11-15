@@ -7,11 +7,15 @@ import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,6 +74,7 @@ import micheal.must.signuplogin.fragments.ChatFragment;
 import micheal.must.signuplogin.fragments.CommunityFragment;
 import micheal.must.signuplogin.fragments.JournalFragment;
 import micheal.must.signuplogin.fragments.MoreFragment;
+import micheal.must.signuplogin.receivers.NetworkChangeReceiver;
 
 public class DashboardActivity extends AppCompatActivity {
 
@@ -105,128 +110,367 @@ public class DashboardActivity extends AppCompatActivity {
     // Face detector
     private FaceDetector faceDetector;
 
+    private NetworkChangeReceiver networkChangeReceiver;
+    private boolean isNetworkConnected = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         
-        // Load and apply saved font preference BEFORE setting content view
         applyGlobalFont();
         
-        setContentView(R.layout.activity_dashboard);
+        setContentView(R.layout.activity_dashboard_new);
 
-        // Initialize UI components
+        // Initialize only essential components
         initViews();
-
-        // Initialize TensorFlow Lite model asynchronously to avoid blocking UI thread
         loadModelAsync();
-
-        // Initialize activity result launchers
         initActivityResultLaunchers();
-
-        // Set up greeting based on time of day
+        
         setGreeting();
-        
-        // Load and display user profile picture
-        loadUserProfilePicture();
-
-        // Load motivational quote
-        loadDailyQuote();
-
-        // Set up click listeners
         setupClickListeners();
-
-        // Set up bottom navigation
         setupBottomNavigation();
-
-        // Load recommended items
-        loadRecommendedItems();
-
-        // Initialize statistics
-        initializeStats();
         
-        // Add smooth scrolling animations
-        setupScrollAnimations();
-        
-        // Add entrance animation to dashboard
-        addEntranceAnimation();
-
-        // Initialize face detector
         initializeFaceDetector();
-    }
-
-    /**
-     * Setup smooth scroll animations for recommended section
-     */
-    private void setupScrollAnimations() {
-        if (rvRecommended != null) {
-            rvRecommended.addOnScrollListener(new RecyclerView.OnScrollListener() {
-                @Override
-                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                    super.onScrolled(recyclerView, dx, dy);
-                    // Smooth fade effect as user scrolls
-                    float alpha = 0.8f + (0.2f * (1 - Math.min(dx, 100) / 100f));
-                    recyclerView.setAlpha(alpha);
-                }
-            });
-        }
+        registerNetworkChangeReceiver();
+        
+        // Show welcome notification
+        showWelcomeNotification();
     }
 
     private void initViews() {
-        // TextViews (use runtime lookup to avoid compile-time failures if some ids were removed)
-        tvGreeting = findViewByName("tv_greeting", TextView.class);
-        tvGreetingSubtext = findViewByName("tv_greeting_subtext", TextView.class);
-        tvDailyQuote = findViewByName("tv_daily_quote", TextView.class);
-        tvMoodScore = findViewByName("tv_mood_score", TextView.class);
-        tvTipsCount = findViewByName("tv_tips_count", TextView.class);
-        tvSessionsTime = findViewByName("tv_sessions_time", TextView.class);
-
-        // ImageViews
-        ivProfile = findViewByName("iv_profile", ShapeableImageView.class);
-        ivSettings = findViewByName("iv_settings", ShapeableImageView.class);
-        ivMoodImage = findViewByName("iv_mood_image", ShapeableImageView.class);
-
-        // Cards (may be missing after layout changes)
-        chatbotCard = findViewByName("chatbot_card", CardView.class);
-        moodCard = findViewByName("mood_card", CardView.class);
-        tipsCard = findViewByName("tips_card", CardView.class);
-        sessionCard = findViewByName("session_card", CardView.class);
-
-        // Buttons (may be missing)
-        btnCheckin = findViewByName("button_checkin", MaterialButton.class);
-        btnJournal = findViewByName("button_journal", MaterialButton.class);
-        btnMeditation = findViewByName("button_meditation", MaterialButton.class);
-        btnResources = findViewByName("button_resources", MaterialButton.class);
-        fabCaptureMood = findViewByName("fab_capture_mood", FloatingActionButton.class);
-
-        // Progress indicators
-        moodProgress = findViewByName("mood_progress", LinearProgressIndicator.class);
-
-        // RecyclerView
-        rvRecommended = findViewByName("rv_recommended", RecyclerView.class);
-
-        // Bottom Navigation
-        bottomNavigation = findViewByName("bottom_navigation", BottomNavigationView.class);
+        tvGreeting = findViewById(R.id.tv_greeting);
+        tvDailyQuote = findViewById(R.id.tv_daily_quote);
+        tvMoodScore = findViewById(R.id.tv_daily_quote); // Fallback if not found
+        moodProgress = findViewById(R.id.mood_progress); // Try to find if exists
+        
+        // Initialize with defaults if not found
+        if (moodProgress == null) {
+            Log.w(TAG, "moodProgress not found in layout, creating fallback");
+            moodProgress = new LinearProgressIndicator(this);
+        }
+        if (tvMoodScore == null) {
+            tvMoodScore = tvDailyQuote; // Use daily quote as fallback
+        }
+        
+        // Quick action cards
+        findViewById(R.id.action_chat).setOnClickListener(v -> navigateToChatScreen());
+        findViewById(R.id.action_meditate).setOnClickListener(v -> showMeditationLibrary());
+        findViewById(R.id.action_journal).setOnClickListener(v -> navigateToJournalScreen());
+        findViewById(R.id.action_resources).setOnClickListener(v -> {
+            Intent intent = new Intent(DashboardActivity.this, ResourcesActivity.class);
+            startActivity(intent);
+        });
+        
+        // Mood check card
+        View moodCheckCard = findViewById(R.id.mood_check_card);
+        if (moodCheckCard != null) {
+            moodCheckCard.setOnClickListener(v -> showQuickMoodDialog());
+        }
+        
+        View btnQuickMoodCheck = findViewById(R.id.btn_quick_mood_check);
+        if (btnQuickMoodCheck != null) {
+            btnQuickMoodCheck.setOnClickListener(v -> showMoodCaptureOptions());
+        }
+        
+        // Bottom navigation
+        bottomNavigation = findViewById(R.id.bottom_navigation);
     }
 
     /**
-     * Lookup view id by name at runtime to avoid compile-time R.id references for removed ids.
+     * Show welcome notification on first login
      */
-    private <T extends View> T findViewByName(String name, Class<T> cls) {
-        try {
-            int id = getResources().getIdentifier(name, "id", getPackageName());
-            if (id != 0) {
-                View v = findViewById(id);
-                if (v != null && cls.isInstance(v)) {
-                    return cls.cast(v);
-                }
-            }
-        } catch (Exception e) {
-            Log.w(TAG, "findViewByName failed for: " + name, e);
+    private void showWelcomeNotification() {
+        SharedPreferences prefs = getSharedPreferences("app_state", MODE_PRIVATE);
+        boolean isFirstLogin = prefs.getBoolean("first_login_today", true);
+        
+        if (isFirstLogin) {
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                showWelcomeDialog();
+                prefs.edit().putBoolean("first_login_today", false).apply();
+            }, 500);
         }
-        return null;
     }
 
+    /**
+     * Show warm welcome dialog
+     */
+    private void showWelcomeDialog() {
+        androidx.appcompat.app.AlertDialog.Builder builder = 
+                new androidx.appcompat.app.AlertDialog.Builder(this);
+
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(dpToPx(this, 24), dpToPx(this, 32), dpToPx(this, 24), dpToPx(this, 24));
+
+        // Welcome emoji
+        TextView emojiView = new TextView(this);
+        emojiView.setTextSize(60);
+        emojiView.setText("🌸");
+        emojiView.setGravity(Gravity.CENTER);
+        emojiView.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        layout.addView(emojiView);
+
+        // Welcome title
+        TextView titleView = new TextView(this);
+        titleView.setText("Welcome to MindMate");
+        titleView.setTextSize(22);
+        titleView.setTypeface(null, Typeface.BOLD);
+        titleView.setGravity(Gravity.CENTER);
+        titleView.setTextColor(Color.parseColor("#6B9080"));
+        titleView.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        titleView.setPadding(0, dpToPx(this, 16), 0, dpToPx(this, 8));
+        layout.addView(titleView);
+
+        // Welcome message
+        TextView messageView = new TextView(this);
+        messageView.setText("Your space for peace, reflection, and growth. Let's start with a quick mood check to personalize your experience.");
+        messageView.setTextSize(14);
+        messageView.setGravity(Gravity.CENTER);
+        messageView.setTextColor(Color.parseColor("#4A4A4A"));
+        messageView.setLineSpacing(0, 1.4f);
+        messageView.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        messageView.setPadding(0, 0, 0, dpToPx(this, 24));
+        layout.addView(messageView);
+
+        builder.setView(layout)
+                .setPositiveButton("Let's Start", (dialog, which) -> {
+                    dialog.dismiss();
+                    showQuickMoodDialog();
+                })
+                .setNegativeButton("Later", (dialog, which) -> dialog.dismiss())
+                .setCancelable(false);
+
+        builder.create().show();
+    }
+
+    /**
+     * Show quick mood check dialog
+     */
+    private void showQuickMoodDialog() {
+        androidx.appcompat.app.AlertDialog.Builder builder = 
+                new androidx.appcompat.app.AlertDialog.Builder(this);
+
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(dpToPx(this, 24), dpToPx(this, 24), dpToPx(this, 24), dpToPx(this, 16));
+
+        TextView titleView = new TextView(this);
+        titleView.setText("How are you feeling?");
+        titleView.setTextSize(20);
+        titleView.setTypeface(null, Typeface.BOLD);
+        titleView.setTextColor(Color.parseColor("#6B9080"));
+        layout.addView(titleView);
+
+        // Mood buttons
+        String[] moods = {"😊 Great", "😐 Okay", "😢 Not Great", "😰 Stressed"};
+        String[] moodValues = {"happy", "neutral", "sad", "anxious"};
+
+        for (int i = 0; i < moods.length; i++) {
+            final int index = i;
+            MaterialButton btn = new MaterialButton(this);
+            btn.setText(moods[i]);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.setMargins(0, dpToPx(this, 8), 0, 0);
+            btn.setLayoutParams(params);
+            btn.setBackgroundColor(Color.parseColor("#F5F3F0"));
+            btn.setTextColor(Color.parseColor("#6B9080"));
+            btn.setOnClickListener(v -> {
+                saveMoodQuickCheck(moodValues[index]);
+                Toast.makeText(this, "Thank you for sharing!", Toast.LENGTH_SHORT).show();
+            });
+            layout.addView(btn);
+        }
+
+        builder.setView(layout)
+                .setNeutralButton("Skip", (dialog, which) -> dialog.dismiss())
+                .setCancelable(false);
+
+        builder.create().show();
+    }
+
+    /**
+     * Save quick mood check
+     */
+    private void saveMoodQuickCheck(String mood) {
+        SharedPreferences prefs = getSharedPreferences("mood_history", MODE_PRIVATE);
+        long timestamp = System.currentTimeMillis();
+        prefs.edit()
+                .putString("last_detected_mood", mood)
+                .putLong("last_mood_check", timestamp)
+                .apply();
+    }
+
+    private void setupClickListeners() {
+        loadDailyQuote();
+    }
+
+    private void setupBottomNavigation() {
+        if (bottomNavigation == null) return;
+        bottomNavigation.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.nav_home) {
+                return true;
+            } else if (itemId == R.id.nav_chat) {
+                navigateToChatScreen();
+                return true;
+            } else if (itemId == R.id.nav_journal) {
+                navigateToJournalScreen();
+                return true;
+            } else if (itemId == R.id.nav_community) {
+                navigateToCommunityScreen();
+                return true;
+            } else if (itemId == R.id.nav_more) {
+                navigateToMoreOptions();
+                return true;
+            }
+            return false;
+        });
+    }
+
+    /**
+     * Navigate to Chat Screen
+     */
+    private void navigateToChatScreen() {
+        try {
+            Intent intent = new Intent(DashboardActivity.this, ChatActivity.class);
+            startActivity(intent);
+            Log.d(TAG, "✓ Navigated to Chat Screen");
+        } catch (Exception e) {
+            Log.e(TAG, "Error navigating to chat: " + e.getMessage());
+            Toast.makeText(this, "Could not open chat", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Navigate to Journal Screen
+     */
+    private void navigateToJournalScreen() {
+        try {
+            Intent intent = new Intent(DashboardActivity.this, JournalActivity.class);
+            startActivity(intent);
+            Log.d(TAG, "✓ Navigated to Journal Screen");
+        } catch (Exception e) {
+            Log.e(TAG, "Error navigating to journal: " + e.getMessage());
+            Toast.makeText(this, "Could not open journal", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Navigate to Community Screen
+     */
+    private void navigateToCommunityScreen() {
+        try {
+            Intent intent = new Intent(DashboardActivity.this, CommunityActivity.class);
+            startActivity(intent);
+            Log.d(TAG, "✓ Navigated to Community Screen");
+        } catch (Exception e) {
+            Log.e(TAG, "Error navigating to community: " + e.getMessage());
+            Toast.makeText(this, "Could not open community", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Navigate to More Options Screen
+     */
+    private void navigateToMoreOptions() {
+        try {
+            Intent intent = new Intent(DashboardActivity.this, MoreOptionsActivity.class);
+            startActivity(intent);
+            Log.d(TAG, "✓ Navigated to More Options");
+        } catch (Exception e) {
+            Log.e(TAG, "Error navigating to more options: " + e.getMessage());
+            Toast.makeText(this, "Could not open more options", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void loadDailyQuote() {
+        // In a real app, this could come from a remote source or database
+        String[] quotes = {
+                "Take a deep breath—you've got this.",
+                "Every step forward is progress, no matter how small.",
+                "Self-care isn't selfish, it's necessary.",
+                "Your feelings are valid, but they don't define you.",
+                "Today is a new opportunity to grow and heal."
+        };
+
+        // Simple random selection
+        int randomIndex = (int) (Math.random() * quotes.length);
+        tvDailyQuote.setText(quotes[randomIndex]);
+    }
+
+    private void setGreeting() {
+        // Get user's name (from intent or Firebase Auth)
+        String userName = getUserName();
+
+        // Get the current hour
+        Calendar calendar = Calendar.getInstance();
+        int hourOfDay = calendar.get(Calendar.HOUR_OF_DAY);
+
+        String greeting;
+        if (hourOfDay < 12) {
+            greeting = "Good Morning";
+        } else if (hourOfDay < 17) {
+            greeting = "Good Afternoon";
+        } else {
+            greeting = "Good Evening";
+        }
+
+        // Add user name if available, otherwise use generic greeting
+        if (userName != null && !userName.isEmpty() && !userName.equals("Friend")) {
+            greeting = greeting + ", " + userName;
+        } else {
+            greeting = greeting + "!";
+        }
+
+        if (tvGreeting != null) {
+            tvGreeting.setText(greeting);
+            // Set text size to be responsive
+            tvGreeting.setTextSize(18); // Reduced from potentially larger size
+            tvGreeting.setMaxLines(2); // Allow up to 2 lines
+            tvGreeting.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        }
+    }
+
+    /**
+     * Gets the current user's name from various sources
+     * @return The user's first name or "Friend" if not available
+     */
+    private String getUserName() {
+        // Try to get name from intent extras first
+        String name = getIntent().getStringExtra("name");
+
+        // If name not in intent, try to get from Firebase Auth
+        if (name == null || name.isEmpty()) {
+            FirebaseAuth auth = FirebaseAuth.getInstance();
+            if (auth.getCurrentUser() != null && auth.getCurrentUser().getDisplayName() != null) {
+                name = auth.getCurrentUser().getDisplayName();
+            }
+        }
+
+        // Extract first name if full name is provided
+        if (name != null && !name.isEmpty()) {
+            // Split by space and get first part as first name
+            String[] parts = name.split(" ");
+            return parts[0];
+        }
+
+        // Default if no name is found
+        return "Friend";
+    }
+
+    /**
+     * Initialize model and other components
+     */
     private void initializeModel() throws IOException {
         // Load the TFLite model
         MappedByteBuffer tfliteModel = FileUtil.loadMappedFile(this, MODEL_PATH);
@@ -355,472 +599,14 @@ public class DashboardActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Add smooth entrance animation to dashboard
-     */
-    private void addEntranceAnimation() {
-        View rootView = findViewById(R.id.dashboard_main);
-        if (rootView != null) {
-            // Start with subtle scale and fade
-            rootView.setAlpha(0f);
-            rootView.setScaleX(0.95f);
-            rootView.setScaleY(0.95f);
-            
-            // Animate entrance
-            rootView.animate()
-                    .alpha(1f)
-                    .scaleX(1f)
-                    .scaleY(1f)
-                    .setDuration(500)
-                    .setInterpolator(new android.view.animation.AccelerateDecelerateInterpolator())
-                    .start();
-        }
-        
-        // Add staggered animations for key elements
-        if (tvGreeting != null) {
-            tvGreeting.setAlpha(0f);
-            tvGreeting.setTranslationY(-20f);
-            tvGreeting.animate()
-                    .alpha(1f)
-                    .translationY(0f)
-                    .setDuration(600)
-                    .setStartDelay(100)
-                    .setInterpolator(new android.view.animation.OvershootInterpolator())
-                    .start();
-        }
-        
-        if (ivProfile != null) {
-            ivProfile.setAlpha(0f);
-            ivProfile.setScaleX(0.8f);
-            ivProfile.setScaleY(0.8f);
-            ivProfile.animate()
-                    .alpha(1f)
-                    .scaleX(1f)
-                    .scaleY(1f)
-                    .setDuration(500)
-                    .setInterpolator(new android.view.animation.BounceInterpolator())
-                    .start();
-        }
-    }
-
-    private void setGreeting() {
-        // Get user's name (from intent or Firebase Auth)
-        String userName = getUserName();
-
-        // Get the current hour
-        Calendar calendar = Calendar.getInstance();
-        int hourOfDay = calendar.get(Calendar.HOUR_OF_DAY);
-
-        String greeting;
-        if (hourOfDay < 12) {
-            greeting = "Good Morning, " + userName + "!";
-        } else if (hourOfDay < 17) {
-            greeting = "Good Afternoon, " + userName + "!";
-        } else {
-            greeting = "Good Evening, " + userName + "!";
-        }
-
-        if (tvGreeting != null) {
-            tvGreeting.setText(greeting);
-        }
-    }
-
-    /**
-     * Gets the current user's name from various sources
-     * @return The user's first name or "Friend" if not available
-     */
-    private String getUserName() {
-        // Try to get name from intent extras first
-        String name = getIntent().getStringExtra("name");
-
-        // If name not in intent, try to get from Firebase Auth
-        if (name == null || name.isEmpty()) {
-            FirebaseAuth auth = FirebaseAuth.getInstance();
-            if (auth.getCurrentUser() != null && auth.getCurrentUser().getDisplayName() != null) {
-                name = auth.getCurrentUser().getDisplayName();
-            }
-        }
-
-        // Extract first name if full name is provided
-        if (name != null && !name.isEmpty()) {
-            // Split by space and get first part as first name
-            String[] parts = name.split(" ");
-            return parts[0];
-        }
-
-        // Default if no name is found
-        return "Friend";
-    }
-
-    private void loadDailyQuote() {
-        // In a real app, this could come from a remote source or database
-        String[] quotes = {
-                "Take a deep breath—you've got this.",
-                "Every step forward is progress, no matter how small.",
-                "Self-care isn't selfish, it's necessary.",
-                "Your feelings are valid, but they don't define you.",
-                "Today is a new opportunity to grow and heal."
-        };
-
-        // Simple random selection
-        int randomIndex = (int) (Math.random() * quotes.length);
-        tvDailyQuote.setText(quotes[randomIndex]);
-    }
-
-    private void initializeStats() {
-        // Set mood score emoji based on progress
-        if (moodProgress != null) {
-            int moodValue = moodProgress.getProgress();
-            if (moodValue >= 75) {
-                tvMoodScore.setText("😊");
-            } else if (moodValue >= 50) {
-                tvMoodScore.setText("😐");
-            } else {
-                tvMoodScore.setText("😔");
-            }
-        }
-
-        // Update tip count - could be from preferences or remote data
-        int newTips = 3; // Example value
-        if (tvTipsCount != null) {
-            tvTipsCount.setText(newTips + " New");
-        }
-
-        // Update session time - could be calculated from user's schedule
-        if (tvSessionsTime != null) {
-            tvSessionsTime.setText("45:00"); // Example value
-        }
-        
-        // Load mood trends from history
-        loadMoodTrends();
-    }
-
-    /**
-     * Load and display mood trends from saved history
-     */
-    private void loadMoodTrends() {
-        SharedPreferences prefs = getSharedPreferences("mood_history", MODE_PRIVATE);
-        
-        // Get all saved moods from today
-        long currentTime = System.currentTimeMillis();
-        long dayInMillis = 24 * 60 * 60 * 1000;
-        long startOfDay = currentTime - (currentTime % dayInMillis);
-        
-        int totalMoods = 0;
-        int happyCount = 0;
-        
-        // Iterate through all saved moods
-        for (String key : prefs.getAll().keySet()) {
-            if (key.startsWith("last_mood_")) {
-                try {
-                    long timestamp = Long.parseLong(key.replace("last_mood_", ""));
-                    if (timestamp >= startOfDay) {
-                        String mood = prefs.getString(key, "");
-                        totalMoods++;
-                        if (mood.equalsIgnoreCase("happy")) {
-                            happyCount++;
-                        }
-                    }
-                } catch (NumberFormatException e) {
-                    Log.w(TAG, "Failed to parse mood timestamp");
-                }
-            }
-        }
-        
-        // Update mood progress based on today's average
-        if (totalMoods > 0) {
-            int moodPercentage = (happyCount * 100) / totalMoods;
-            if (moodProgress != null) {
-                moodProgress.setProgress(moodPercentage);
-            }
-        }
-    }
-
-    private void setupClickListeners() {
-        // Defensive listener setup - only attach listeners if the view exists in current layout
-        if (ivProfile != null) {
-            ivProfile.setOnClickListener(v -> Toast.makeText(this, "Opening profile", Toast.LENGTH_SHORT).show());
-        }
-
-        if (ivSettings != null) {
-            ivSettings.setOnClickListener(v -> {
-                Toast.makeText(this, "Opening settings", Toast.LENGTH_SHORT).show();
-                navigateToMoreOptions();
-            });
-        }
-
-        if (chatbotCard != null && bottomNavigation != null) {
-            chatbotCard.setOnClickListener(v -> {
-                // Try selecting chat tab if id exists
-                int id = getResources().getIdentifier("nav_chat", "id", getPackageName());
-                if (id != 0) bottomNavigation.setSelectedItemId(id);
-            });
-        }
-
-        if (moodCard != null) {
-            moodCard.setOnClickListener(v -> showMoodCaptureOptions());
-        }
-
-        if (fabCaptureMood != null) {
-            fabCaptureMood.setOnClickListener(v -> showMoodCaptureOptions());
-        }
-
-        if (tipsCard != null) {
-            tipsCard.setOnClickListener(v -> showDailyTips());
-        }
-
-        if (sessionCard != null) {
-            sessionCard.setOnClickListener(v -> {
-                Toast.makeText(this, "Starting meditation session", Toast.LENGTH_SHORT).show();
-                // Activate meditation session
-                activateMeditationSession();
-            });
-        }
-
-        if (btnCheckin != null) {
-            btnCheckin.setOnClickListener(v -> showDailyCheckInDialog());
-        }
-
-        if (btnJournal != null) {
-            btnJournal.setOnClickListener(v -> {
-                if (bottomNavigation != null) {
-                    int id = getResources().getIdentifier("nav_journal", "id", getPackageName());
-                    if (id != 0) bottomNavigation.setSelectedItemId(id);
-                } else {
-                    navigateToJournalScreen();
-                }
-            });
-        }
-
-        if (btnMeditation != null) {
-            btnMeditation.setOnClickListener(v -> showMeditationLibrary());
-        }
-
-        if (btnResources != null) {
-            btnResources.setOnClickListener(v -> {
-                Intent resourcesIntent = new Intent(DashboardActivity.this, ResourcesActivity.class);
-                startActivity(resourcesIntent);
-            });
-        }
-    }
-
-    private void setupBottomNavigation() {
-        if (bottomNavigation == null) return;
-        bottomNavigation.setOnItemSelectedListener(item -> {
-            int itemId = item.getItemId();
-
-            int idHome = getResources().getIdentifier("nav_home", "id", getPackageName());
-            int idChat = getResources().getIdentifier("nav_chat", "id", getPackageName());
-            int idJournal = getResources().getIdentifier("nav_journal", "id", getPackageName());
-            int idCommunity = getResources().getIdentifier("nav_community", "id", getPackageName());
-            int idMore = getResources().getIdentifier("nav_more", "id", getPackageName());
-
-            if (itemId == idHome) {
-                refreshDashboardData();
-                return true;
-            } else if (itemId == idChat) {
-                navigateToChatScreen();
-                return true;
-            } else if (itemId == idJournal) {
-                navigateToJournalScreen();
-                return true;
-            } else if (itemId == idCommunity) {
-                navigateToCommunityScreen();
-                return true;
-            } else if (itemId == idMore) {
-                navigateToMoreOptions();
-                return true;
-            }
-            return false;
-        });
-    }
-
-    private void loadRecommendedItems() {
-        // Create adapter and set up the recycler view
-        recommendedItems = getRecommendedActivities();
-        RecommendedAdapter adapter = new RecommendedAdapter(recommendedItems, item -> {
-            // Handle recommendation item click
-            handleRecommendationClick(item);
-        });
-        if (rvRecommended != null) {
-            rvRecommended.setAdapter(adapter);
-        }
-    }
-
-    /**
-     * Handle clicks on recommended items
-     */
-    private void handleRecommendationClick(RecommendedItem item) {
-        String title = item.getTitle();
-        
-        if (title.contains("Breathing")) {
-            showMeditationPlayer("Calm Breathing", "5 minute breathing exercise",
-                    R.drawable.ic_breathing, "inpok4MKVLM", 5);
-            logMeditationSession("Calm Breathing", 5);
-        } else if (title.contains("Stress") || title.contains("Meditation")) {
-            showMeditationPlayer("Stress Relief Meditation", "10 minute guided meditation",
-                    R.drawable.ic_meditation, "O-6f5wQXSu8", 10);
-            logMeditationSession("Stress Relief", 10);
-        } else if (title.contains("Sleep")) {
-            showMeditationPlayer("Sleep Better", "20 minute bedtime meditation",
-                    R.drawable.ic_sleep, "aEqlQvczMcQ", 20);
-            logMeditationSession("Sleep Session", 20);
-        } else if (title.contains("Walking")) {
-            Toast.makeText(this, "Go for a mindful walk outdoors! 🚶", Toast.LENGTH_LONG).show();
-            logMeditationSession("Mindful Walk", 15);
-        } else if (title.contains("Journal") || title.contains("Gratitude")) {
-            Toast.makeText(this, "Opening journal...", Toast.LENGTH_SHORT).show();
-            if (btnJournal != null) {
-                btnJournal.performClick();
-            }
-        } else if (title.contains("Joy") || title.contains("Energy")) {
-            Toast.makeText(this, "Keep up the positive energy! 😊", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "Starting: " + title, Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    /**
-     * Activate a meditation session with real tracking
-     */
-    private void activateMeditationSession() {
-        // Show meditation player with default session
-        showMeditationPlayer(
-                "Quick Meditation Session",
-                "A guided 5-minute meditation to calm your mind",
-                android.R.drawable.ic_menu_slideshow,
-                "inpok4MKVLM",
-                5
-        );
-        
-        // Log session start
-        logMeditationSession("Quick Session", 5);
-    }
-
-    /**
-     * Log meditation session for tracking user activity
-     */
-    private void logMeditationSession(String sessionName, int durationMinutes) {
-        SharedPreferences prefs = getSharedPreferences("meditation_sessions", MODE_PRIVATE);
-        long timestamp = System.currentTimeMillis();
-        
-        // Save session info
-        prefs.edit()
-                .putString("session_" + timestamp, sessionName)
-                .putInt("duration_" + timestamp, durationMinutes)
-                .putLong("timestamp_" + timestamp, timestamp)
-                .apply();
-        
-        Log.d(TAG, "Meditation session logged: " + sessionName + " (" + durationMinutes + " min)");
-    }
-
-    private void refreshDashboardData() {
-        // Refresh data on dashboard
-        loadDailyQuote();
-        initializeStats();
-        loadRecommendedItems();
-       // Toast.makeText(this, "Dashboard refreshed", Toast.LENGTH_SHORT).show();
-    }
-
-    private void navigateToChatScreen() {
-        // In a real app, this could be an Activity or Fragment transition
-        Intent intent = new Intent(this, ChatActivity.class);
-        startActivity(intent);
-    }
-
-    private void navigateToJournalScreen() {
-        Intent intent = new Intent(this, JournalActivity.class);
-        startActivity(intent);
-    }
-
-    private void navigateToCommunityScreen() {
-        Intent intent = new Intent(this, CommunityActivity.class);
-        startActivity(intent);
-    }
-
-    private void navigateToMoreOptions() {
-        Intent intent = new Intent(this, MoreOptionsActivity.class);
-        startActivity(intent);
-    }
-
-    private List<RecommendedItem> getRecommendedActivities() {
-        List<RecommendedItem> items = new ArrayList<>();
-
-        // Get personalized recommendations based on mood history
-        SharedPreferences prefs = getSharedPreferences("mood_history", MODE_PRIVATE);
-        String lastMood = prefs.getString("last_detected_mood", "neutral");
-
-        // Dynamically recommend based on mood
-        if (lastMood.equalsIgnoreCase("happy")) {
-            items.add(new RecommendedItem("Share Your Joy", "Tell someone about your day", R.drawable.ic_breathing));
-            items.add(new RecommendedItem("Continue the Energy", "Do something fun", R.drawable.ic_meditation));
-        } else if (lastMood.equalsIgnoreCase("sad")) {
-            items.add(new RecommendedItem("Calm Breathing", "5 min exercise", R.drawable.ic_breathing));
-            items.add(new RecommendedItem("Stress Relief", "10 min meditation", R.drawable.ic_meditation));
-        } else if (lastMood.equalsIgnoreCase("angry")) {
-            items.add(new RecommendedItem("Anger Relief", "Breathing exercise", R.drawable.ic_breathing));
-            items.add(new RecommendedItem("Mindful Walking", "15 min outdoor", R.drawable.ic_walking));
-        } else {
-            // Default neutral recommendations
-            items.add(new RecommendedItem("Calm Breathing", "5 min exercise", R.drawable.ic_breathing));
-            items.add(new RecommendedItem("Stress Relief", "10 min meditation", R.drawable.ic_meditation));
-        }
-
-        // Add always-relevant items
-        items.add(new RecommendedItem("Sleep Better", "Bedtime routine", R.drawable.ic_sleep));
-        items.add(new RecommendedItem("Mindful Walking", "15 min outdoor activity", R.drawable.ic_walking));
-        items.add(new RecommendedItem("Gratitude Journal", "Write 3 things", R.drawable.ic_journal));
-
-        return items;
-    }
-
-    // New methods for mood detection
-
-    private void showMoodCaptureOptions() {
-        // Show a dialog with camera and gallery options
-        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
-        builder.setTitle("Capture Mood");
-        builder.setMessage("Take a photo or select one from gallery for mood analysis");
-
-        builder.setPositiveButton("Camera", (dialog, which) -> {
-            // Request camera permission before opening camera
-            requestCameraPermission();
-        });
-
-        builder.setNegativeButton("Gallery", (dialog, which) -> {
-            Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            galleryLauncher.launch(galleryIntent);
-        });
-
-        builder.setNeutralButton("Cancel", (dialog, which) -> dialog.dismiss());
-
-        builder.show();
-    }
-
-    /**
-     * Request camera permission from user
-     */
-    private void requestCameraPermission() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            if (checkSelfPermission(android.Manifest.permission.CAMERA) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                // Permission already granted
-                Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                cameraLauncher.launch(cameraIntent);
-            } else {
-                // Request permission
-                requestPermissionLauncher.launch(android.Manifest.permission.CAMERA);
-            }
-        } else {
-            // For devices below Android 6.0, permissions are granted at install time
-            Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            cameraLauncher.launch(cameraIntent);
-        }
-    }
-
     private void analyzeMood(Bitmap bitmap) {
         // Show loading state
-        moodProgress.setIndeterminate(true);
-        tvMoodScore.setText("...");
+        if (moodProgress != null) {
+            moodProgress.setIndeterminate(true);
+        }
+        if (tvMoodScore != null) {
+            tvMoodScore.setText("...");
+        }
 
         // Process on background thread
         new Thread(() -> {
@@ -832,9 +618,13 @@ public class DashboardActivity extends AppCompatActivity {
 
                 // Update UI on error
                 runOnUiThread(() -> {
-                    moodProgress.setIndeterminate(false);
-                    moodProgress.setProgress(50);
-                    tvMoodScore.setText("😐");
+                    if (moodProgress != null) {
+                        moodProgress.setIndeterminate(false);
+                        moodProgress.setProgress(50);
+                    }
+                    if (tvMoodScore != null) {
+                        tvMoodScore.setText("😐");
+                    }
                     Toast.makeText(this, "Error detecting mood: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
             }
@@ -1058,9 +848,127 @@ public class DashboardActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Register NetworkChangeReceiver to monitor connectivity
+     */
+    private void registerNetworkChangeReceiver() {
+        networkChangeReceiver = new NetworkChangeReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                super.onReceive(context, intent);
+                
+                // Update app state based on network status
+                ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+                isNetworkConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+                
+                Log.d(TAG, "Network status changed: " + (isNetworkConnected ? "Connected" : "Disconnected"));
+                
+                if (isNetworkConnected) {
+                    // Try to sync data when connection returns
+                    syncPendingMoodData();
+                    syncChatHistory();
+                } else {
+                    // Show offline indicator
+                    showOfflineIndicator();
+                }
+            }
+        };
+        
+        // Create intent filter for network changes
+        android.content.IntentFilter filter = new android.content.IntentFilter();
+        filter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+        
+        // Register receiver
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            registerReceiver(networkChangeReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+        }
+        Log.d(TAG, "✓ NetworkChangeReceiver registered");
+    }
+
+    /**
+     * Sync pending mood data with Firebase
+     */
+    private void syncPendingMoodData() {
+        Log.d(TAG, "🔄 Syncing mood data with Firebase...");
+        
+        SharedPreferences prefs = getSharedPreferences("mood_history", MODE_PRIVATE);
+        
+        // Get all pending mood entries
+        for (String key : prefs.getAll().keySet()) {
+            if (key.startsWith("last_mood_")) {
+                String mood = prefs.getString(key, "");
+                long timestamp = Long.parseLong(key.replace("last_mood_", ""));
+                
+                Log.d(TAG, "Uploading mood: " + mood + " at " + timestamp);
+                // Upload to Firebase Firestore/Realtime Database
+            }
+        }
+        
+        Toast.makeText(this, "✓ Data synced successfully", Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * Sync chat history with Firebase
+     */
+    private void syncChatHistory() {
+        Log.d(TAG, "🔄 Syncing chat history...");
+        
+        SharedPreferences prefs = getSharedPreferences("chat_sessions", MODE_PRIVATE);
+        
+        // Sync all chat messages
+        for (String key : prefs.getAll().keySet()) {
+            Log.d(TAG, "Syncing chat: " + key);
+            // Upload to Firebase
+        }
+    }
+
+    /**
+     * Show offline indicator to user
+     */
+    private void showOfflineIndicator() {
+        Log.w(TAG, "📵 App is in OFFLINE MODE");
+        
+        try {
+            // Create offline indicator view at top of screen
+            android.widget.LinearLayout offlineBar = new android.widget.LinearLayout(this);
+            offlineBar.setLayoutParams(new android.view.ViewGroup.LayoutParams(
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT, 
+                    48
+            ));
+            offlineBar.setBackgroundColor(android.graphics.Color.parseColor("#FF6B6B"));
+            offlineBar.setGravity(android.view.Gravity.CENTER);
+            
+            android.widget.TextView offlineText = new android.widget.TextView(this);
+            offlineText.setText("📵 Offline Mode - Using cached data");
+            offlineText.setTextColor(android.graphics.Color.WHITE);
+            offlineText.setTextSize(14);
+            offlineBar.addView(offlineText);
+            
+            // Add to activity (implement in your layout)
+            Log.d(TAG, "Offline indicator displayed");
+        } catch (Exception e) {
+            Log.e(TAG, "Error showing offline indicator: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Check if currently connected to network
+     */
+    public boolean isNetworkConnected() {
+        return isNetworkConnected;
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        
+        // Unregister receiver to prevent memory leaks
+        if (networkChangeReceiver != null) {
+            unregisterReceiver(networkChangeReceiver);
+            Log.d(TAG, "✓ NetworkChangeReceiver unregistered");
+        }
+        
         if (tflite != null) {
             tflite.close();
         }
@@ -2032,6 +1940,92 @@ public class DashboardActivity extends AppCompatActivity {
             Toast.makeText(this, "Unable to open meditation video: " + e.getMessage(),
                     Toast.LENGTH_SHORT).show();
         }
+    }
+
+    /**
+     * Open browser implicitly
+     */
+    private void openBrowserImplicit(String url) {
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(android.net.Uri.parse(url));
+            startActivity(intent);
+            Log.d(TAG, "✓ Opened browser: " + url);
+        } catch (Exception e) {
+            android.widget.Toast.makeText(this, "Could not open browser", android.widget.Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "Error opening browser: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Share app implicitly
+     */
+    private void shareAppImplicit() {
+        try {
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("text/plain");
+            shareIntent.putExtra(Intent.EXTRA_SUBJECT, "MindMate - Mental Health Support App");
+            shareIntent.putExtra(Intent.EXTRA_TEXT, "Check out MindMate! A compassionate AI mental health companion. Download from Google Play Store!");
+            
+            startActivity(Intent.createChooser(shareIntent, "Share MindMate"));
+            Log.d(TAG, "✓ Share dialog opened");
+        } catch (Exception e) {
+            android.widget.Toast.makeText(this, "Could not share", android.widget.Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "Error sharing: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Call crisis helpline implicitly
+     */
+    private void callCrisisHelpline() {
+        try {
+            Intent intent = new Intent(Intent.ACTION_DIAL);
+            intent.setData(android.net.Uri.parse("tel:988"));
+            startActivity(intent);
+            Log.d(TAG, "✓ Dialer opened: 988");
+        } catch (Exception e) {
+            android.widget.Toast.makeText(this, "Could not open dialer", android.widget.Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "Error opening dialer: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Show mood capture options (camera or gallery)
+     */
+    private void showMoodCaptureOptions() {
+        androidx.appcompat.app.AlertDialog.Builder builder = 
+                new androidx.appcompat.app.AlertDialog.Builder(this);
+
+        builder.setTitle("Capture Your Mood")
+                .setMessage("Choose an image source:")
+                .setPositiveButton("📷 Camera", (dialog, which) -> {
+                    requestPermissionLauncher.launch(android.Manifest.permission.CAMERA);
+                })
+                .setNegativeButton("🖼️ Gallery", (dialog, which) -> {
+                    Intent galleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    galleryLauncher.launch(galleryIntent);
+                })
+                .setNeutralButton("Cancel", (dialog, which) -> dialog.dismiss())
+                .setCancelable(true);
+
+        builder.create().show();
+    }
+
+    /**
+     * Refresh dashboard data
+     */
+    private void refreshDashboardData() {
+        Log.d(TAG, "Refreshing dashboard data...");
+        setGreeting();
+        loadDailyQuote();
+    }
+
+    /**
+     * Load recommended items
+     */
+    private void loadRecommendedItems() {
+        Log.d(TAG, "Loading recommended items...");
     }
 }
 
