@@ -1,4 +1,4 @@
-🧠 MindMate – AI-Powered Mental Health Support App
+🧠 MindMate: An AI-Powered Mental Health Support App
 
 “Your mind deserves care too and MindMate is here to listen.”
 
@@ -42,7 +42,7 @@ Image Handling	Glide
 Build System	Gradle
 ⚙️ Setup Instructions
 1️⃣ Clone the repository
-git clone https://github.com/your-username/MindMate.git
+git clone https://github.com/michealamanya/MindMate.git
 cd MindMate
 
 2️⃣ Open in Android Studio
@@ -128,7 +128,7 @@ Amanya Micheal
 
 ⚖️ License
 
-This project is licensed under the MIT License — free to use, modify, and distribute with attribution.
+This project is licensed under the MIT License free to use, modify, and distribute with attribution.
 
 💬 Quote
 
