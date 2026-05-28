@@ -11,8 +11,8 @@ android {
         applicationId = "micheal.must.signuplogin"
         minSdk = 24
         targetSdk = 36
-        versionCode = 6
-        versionName = "1.10"
+        versionCode = 9
+        versionName = "1.10.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

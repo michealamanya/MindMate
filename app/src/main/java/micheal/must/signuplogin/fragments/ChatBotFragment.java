@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -18,7 +17,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.button.MaterialButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,10 +32,11 @@ public class ChatBotFragment extends Fragment {
 
     private static final String TAG = "ChatBotFragment";
 
-    private EditText etChatInput;
-    private ImageButton btnSendMessage;
-    private RecyclerView rvChatMessages;
-    private ProgressBar progressBar;
+    private RecyclerView recyclerView;
+    private EditText etMessage;
+    private FloatingActionButton btnSend;
+    private ProgressBar loadingSpinner;
+
     private ChatMessageAdapter chatAdapter;
     private List<ChatMessage> chatMessages;
     private StringBuilder conversationHistory;
@@ -69,10 +69,10 @@ public class ChatBotFragment extends Fragment {
     }
 
     private void initViews(View view) {
-        etChatInput = view.findViewById(R.id.et_chat_input);
-        btnSendMessage = view.findViewById(R.id.btn_send_message);
-        rvChatMessages = view.findViewById(R.id.rv_chat_messages);
-        progressBar = view.findViewById(R.id.progress_bar);
+        recyclerView = view.findViewById(R.id.recycler_view_chat);
+        etMessage = view.findViewById(R.id.et_message);
+        btnSend = view.findViewById(R.id.btn_send);
+        loadingSpinner = view.findViewById(R.id.loading_spinner);
 
         chatMessages = new ArrayList<>();
         conversationHistory = new StringBuilder();
@@ -80,14 +80,14 @@ public class ChatBotFragment extends Fragment {
 
     private void setupRecyclerView() {
         chatAdapter = new ChatMessageAdapter(chatMessages);
-        rvChatMessages.setLayoutManager(new LinearLayoutManager(requireContext()));
-        rvChatMessages.setAdapter(chatAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        recyclerView.setAdapter(chatAdapter);
     }
 
     private void setupClickListeners() {
-        btnSendMessage.setOnClickListener(v -> sendMessage());
+        btnSend.setOnClickListener(v -> sendMessage());
         
-        etChatInput.setOnEditorActionListener((v, actionId, event) -> {
+        etMessage.setOnEditorActionListener((v, actionId, event) -> {
             sendMessage();
             return true;
         });
@@ -125,7 +125,7 @@ public class ChatBotFragment extends Fragment {
         chatAdapter.notifyDataSetChanged();
         
         if (!chatMessages.isEmpty()) {
-            rvChatMessages.scrollToPosition(chatMessages.size() - 1);
+            recyclerView.scrollToPosition(chatMessages.size() - 1);
         }
         
         Log.d(TAG, "✓ Loaded " + chatMessages.size() + " messages from session");
@@ -150,7 +150,7 @@ public class ChatBotFragment extends Fragment {
     }
 
     private void sendMessage() {
-        String userMessage = etChatInput.getText().toString().trim();
+        String userMessage = etMessage.getText().toString().trim();
 
         if (userMessage.isEmpty()) {
             Toast.makeText(requireContext(), "Please type a message", Toast.LENGTH_SHORT).show();
@@ -160,7 +160,7 @@ public class ChatBotFragment extends Fragment {
         // Check content moderation
         if (!ContentModerationService.isModerationPassed(userMessage)) {
             Toast.makeText(requireContext(), ContentModerationService.getModerationFailureMessage(), Toast.LENGTH_LONG).show();
-            etChatInput.setText("");
+            etMessage.setText("");
             return;
         }
 
@@ -168,7 +168,7 @@ public class ChatBotFragment extends Fragment {
         ChatMessage userChatMessage = new ChatMessage(userMessage, true);
         chatMessages.add(userChatMessage);
         chatAdapter.notifyItemInserted(chatMessages.size() - 1);
-        rvChatMessages.scrollToPosition(chatMessages.size() - 1);
+        recyclerView.scrollToPosition(chatMessages.size() - 1);
 
         // Save to session
         ChatSession.ChatMessage sessionMsg = new ChatSession.ChatMessage(userMessage, true);
@@ -180,32 +180,27 @@ public class ChatBotFragment extends Fragment {
             currentSession.setTitle(title);
         }
 
-        etChatInput.setText("");
-        progressBar.setVisibility(View.VISIBLE);
-        btnSendMessage.setEnabled(false);
-
+        etMessage.setText("");
+        
         // Check network
         if (!isNetworkConnected()) {
-            progressBar.setVisibility(View.GONE);
-            btnSendMessage.setEnabled(true);
             chatMessages.add(new ChatMessage("You're offline. Using local responses...", false));
             chatAdapter.notifyItemInserted(chatMessages.size() - 1);
-            rvChatMessages.scrollToPosition(chatMessages.size() - 1);
+            recyclerView.scrollToPosition(chatMessages.size() - 1);
             return;
         }
+
+        showLoadingSpinner(true);
 
         // Get response
         new Thread(() -> {
             String botResponse = HuggingFaceApiService.getChatResponse(userMessage, conversationHistory.toString());
             
             requireActivity().runOnUiThread(() -> {
-                progressBar.setVisibility(View.GONE);
-                btnSendMessage.setEnabled(true);
-
                 ChatMessage botMessage = new ChatMessage(botResponse, false);
                 chatMessages.add(botMessage);
                 chatAdapter.notifyItemInserted(chatMessages.size() - 1);
-                rvChatMessages.scrollToPosition(chatMessages.size() - 1);
+                recyclerView.scrollToPosition(chatMessages.size() - 1);
 
                 // Save bot response to session
                 ChatSession.ChatMessage botSessionMsg = new ChatSession.ChatMessage(botResponse, false);
@@ -213,6 +208,8 @@ public class ChatBotFragment extends Fragment {
                 historyManager.saveSession(currentSession);
 
                 conversationHistory.append(userMessage).append("\n").append(botResponse).append("\n");
+                
+                showLoadingSpinner(false);
             });
         }).start();
     }
@@ -322,5 +319,18 @@ public class ChatBotFragment extends Fragment {
                 }
             }
         }
+    }
+
+    public void showLoadingSpinner(boolean show) {
+        if (loadingSpinner != null) {
+            loadingSpinner.setVisibility(show ? View.VISIBLE : View.GONE);
+        }
+        if (btnSend != null) {
+            btnSend.setEnabled(!show);
+        }
+    }
+
+    public void hideLoadingSpinner() {
+        showLoadingSpinner(false);
     }
 }

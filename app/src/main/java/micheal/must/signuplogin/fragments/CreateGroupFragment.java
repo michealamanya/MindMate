@@ -10,7 +10,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import androidx.fragment.app.DialogFragment;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -18,12 +18,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.util.ArrayList;
-
 import micheal.must.signuplogin.R;
 import micheal.must.signuplogin.models.Group;
 
-public class CreateGroupFragment extends Fragment {
+public class CreateGroupFragment extends DialogFragment {
 
     private static final String TAG = "CreateGroupFragment";
     private ProgressDialog progressDialog;
@@ -50,7 +48,7 @@ public class CreateGroupFragment extends Fragment {
 
         if (currentUserId == null) {
             Toast.makeText(getContext(), "Please log in first", Toast.LENGTH_SHORT).show();
-            requireActivity().onBackPressed();
+            dismiss();
             return;
         }
 
@@ -110,7 +108,7 @@ public class CreateGroupFragment extends Fragment {
                 progressDialog.dismiss();
                 Toast.makeText(getContext(), "Group created successfully!", Toast.LENGTH_SHORT).show();
                 Log.d(TAG, "Group created with ID: " + groupId);
-                requireActivity().onBackPressed(); // Return to discover section
+                dismiss();
             })
             .addOnFailureListener(e -> {
                 progressDialog.dismiss();

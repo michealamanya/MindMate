@@ -75,6 +75,7 @@ import micheal.must.signuplogin.fragments.CommunityFragment;
 import micheal.must.signuplogin.fragments.JournalFragment;
 import micheal.must.signuplogin.fragments.MoreFragment;
 import micheal.must.signuplogin.receivers.NetworkChangeReceiver;
+import micheal.must.signuplogin.services.BackgroundMusicService;
 
 public class DashboardActivity extends AppCompatActivity {
 
@@ -82,6 +83,7 @@ public class DashboardActivity extends AppCompatActivity {
     private TextView tvGreeting, tvGreetingSubtext, tvDailyQuote;
     private TextView tvMoodScore, tvTipsCount, tvSessionsTime;
     private ShapeableImageView ivProfile, ivSettings;
+    private ImageButton btnMusicToggle; // Add this
     private CardView chatbotCard, moodCard, tipsCard, sessionCard;
     private MaterialButton btnCheckin, btnJournal, btnMeditation, btnResources;
     private RecyclerView rvRecommended;
@@ -112,6 +114,10 @@ public class DashboardActivity extends AppCompatActivity {
 
     private NetworkChangeReceiver networkChangeReceiver;
     private boolean isNetworkConnected = true;
+    private boolean isMusicPlaying = true; // Track music state
+    
+    // Auth listener for logout detection
+    private FirebaseAuth.AuthStateListener authStateListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,6 +127,12 @@ public class DashboardActivity extends AppCompatActivity {
         applyGlobalFont();
         
         setContentView(R.layout.activity_dashboard_new);
+
+        // Start background music
+        startBackgroundMusic();
+        
+        // Setup auth listener to stop music on logout
+        setupAuthListener();
 
         // Initialize only essential components
         initViews();
@@ -138,19 +150,73 @@ public class DashboardActivity extends AppCompatActivity {
         showWelcomeNotification();
     }
 
+    private void startBackgroundMusic() {
+        // Only play if user is authenticated
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            Intent musicIntent = new Intent(this, BackgroundMusicService.class);
+            startService(musicIntent);
+            isMusicPlaying = true;
+            if (btnMusicToggle != null) {
+                btnMusicToggle.setImageResource(android.R.drawable.ic_media_pause);
+            }
+        }
+    }
+    
+    private void stopBackgroundMusic() {
+        Intent musicIntent = new Intent(this, BackgroundMusicService.class);
+        stopService(musicIntent);
+        isMusicPlaying = false;
+        if (btnMusicToggle != null) {
+            btnMusicToggle.setImageResource(android.R.drawable.ic_media_play);
+        }
+    }
+
+    private void toggleBackgroundMusic() {
+        if (isMusicPlaying) {
+            stopBackgroundMusic();
+            Toast.makeText(this, "Music paused", Toast.LENGTH_SHORT).show();
+        } else {
+            startBackgroundMusic();
+            Toast.makeText(this, "Music playing", Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private void setupAuthListener() {
+        authStateListener = firebaseAuth -> {
+            if (firebaseAuth.getCurrentUser() == null) {
+                Log.d(TAG, "User logged out, stopping background music");
+                stopBackgroundMusic();
+            }
+        };
+        FirebaseAuth.getInstance().addAuthStateListener(authStateListener);
+    }
+
     private void initViews() {
         tvGreeting = findViewById(R.id.tv_greeting);
         tvDailyQuote = findViewById(R.id.tv_daily_quote);
-        tvMoodScore = findViewById(R.id.tv_daily_quote); // Fallback if not found
-        moodProgress = findViewById(R.id.mood_progress); // Try to find if exists
         
-        // Initialize with defaults if not found
-        if (moodProgress == null) {
-            Log.w(TAG, "moodProgress not found in layout, creating fallback");
-            moodProgress = new LinearProgressIndicator(this);
+        // Music Toggle Button
+        btnMusicToggle = findViewById(R.id.btn_music_toggle);
+        if (btnMusicToggle != null) {
+            btnMusicToggle.setOnClickListener(v -> toggleBackgroundMusic());
         }
-        if (tvMoodScore == null) {
-            tvMoodScore = tvDailyQuote; // Use daily quote as fallback
+        
+        // Try to find mood views if they exist in layout
+        // We do NOT fallback to tvDailyQuote anymore to avoid overwriting the quote
+        try {
+            int moodScoreId = getResources().getIdentifier("tv_mood_score", "id", getPackageName());
+            if (moodScoreId != 0) tvMoodScore = findViewById(moodScoreId);
+            
+            int moodProgressId = getResources().getIdentifier("mood_progress", "id", getPackageName());
+            if (moodProgressId != 0) moodProgress = findViewById(moodProgressId);
+        } catch (Exception e) {
+            Log.d(TAG, "Mood views lookup failed");
+        }
+        
+        // Initialize moodProgress with detached view if not found (safe for method calls)
+        if (moodProgress == null) {
+            Log.d(TAG, "moodProgress not found in layout, creating invisible fallback");
+            moodProgress = new LinearProgressIndicator(this);
         }
         
         // Quick action cards
@@ -637,24 +703,33 @@ public class DashboardActivity extends AppCompatActivity {
     private void detectFaceAndAnalyzeMood(Bitmap bitmap) {
         try {
             // Create InputImage from bitmap
-            // Create InputImage from bitmap
-            InputImage image = InputImage.fromBitmap(bitmap, 0);// Run face detection
+            InputImage image = InputImage.fromBitmap(bitmap, 0);
+            
+            // Run face detection
             faceDetector.process(image)
                     .addOnSuccessListener(faces -> {
                         if (faces.isEmpty()) {
                             // No face detected
                             runOnUiThread(() -> {
-                                moodProgress.setIndeterminate(false);
-                                moodProgress.setProgress(50);
-                                tvMoodScore.setText("😐");
+                                if (moodProgress != null) {
+                                    moodProgress.setIndeterminate(false);
+                                    moodProgress.setProgress(50);
+                                }
+                                if (tvMoodScore != null) {
+                                    tvMoodScore.setText("😐");
+                                }
                                 showFaceDetectionFailedDialog();
                             });
                         } else if (faces.size() > 1) {
                             // Multiple faces detected
                             runOnUiThread(() -> {
-                                moodProgress.setIndeterminate(false);
-                                moodProgress.setProgress(50);
-                                tvMoodScore.setText("😐");
+                                if (moodProgress != null) {
+                                    moodProgress.setIndeterminate(false);
+                                    moodProgress.setProgress(50);
+                                }
+                                if (tvMoodScore != null) {
+                                    tvMoodScore.setText("😐");
+                                }
                                 Toast.makeText(DashboardActivity.this, 
                                         "Please upload an image with only one face", 
                                         Toast.LENGTH_SHORT).show();
@@ -673,9 +748,13 @@ public class DashboardActivity extends AppCompatActivity {
                             } catch (Exception e) {
                                 Log.e(TAG, "Error during mood analysis: " + e.getMessage());
                                 runOnUiThread(() -> {
-                                    moodProgress.setIndeterminate(false);
-                                    moodProgress.setProgress(50);
-                                    tvMoodScore.setText("😐");
+                                    if (moodProgress != null) {
+                                        moodProgress.setIndeterminate(false);
+                                        moodProgress.setProgress(50);
+                                    }
+                                    if (tvMoodScore != null) {
+                                        tvMoodScore.setText("😐");
+                                    }
                                     Toast.makeText(DashboardActivity.this, 
                                             "Error analyzing mood: " + e.getMessage(), 
                                             Toast.LENGTH_SHORT).show();
@@ -686,9 +765,13 @@ public class DashboardActivity extends AppCompatActivity {
                     .addOnFailureListener(e -> {
                         Log.e(TAG, "Face detection failed: " + e.getMessage());
                         runOnUiThread(() -> {
-                            moodProgress.setIndeterminate(false);
-                            moodProgress.setProgress(50);
-                            tvMoodScore.setText("😐");
+                            if (moodProgress != null) {
+                                moodProgress.setIndeterminate(false);
+                                moodProgress.setProgress(50);
+                            }
+                            if (tvMoodScore != null) {
+                                tvMoodScore.setText("😐");
+                            }
                             Toast.makeText(DashboardActivity.this, 
                                     "Face detection failed. Please try again.", 
                                     Toast.LENGTH_SHORT).show();
@@ -697,9 +780,13 @@ public class DashboardActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e(TAG, "Error preparing face detection: " + e.getMessage());
             runOnUiThread(() -> {
-                moodProgress.setIndeterminate(false);
-                moodProgress.setProgress(50);
-                tvMoodScore.setText("😐");
+                if (moodProgress != null) {
+                    moodProgress.setIndeterminate(false);
+                    moodProgress.setProgress(50);
+                }
+                if (tvMoodScore != null) {
+                    tvMoodScore.setText("😐");
+                }
                 Toast.makeText(this, "Error processing image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             });
         }
@@ -896,12 +983,22 @@ public class DashboardActivity extends AppCompatActivity {
         
         // Get all pending mood entries
         for (String key : prefs.getAll().keySet()) {
-            if (key.startsWith("last_mood_")) {
-                String mood = prefs.getString(key, "");
-                long timestamp = Long.parseLong(key.replace("last_mood_", ""));
-                
-                Log.d(TAG, "Uploading mood: " + mood + " at " + timestamp);
-                // Upload to Firebase Firestore/Realtime Database
+            // Only process keys that store the mood string
+            if (key.startsWith("last_mood_") && !key.equals("last_mood_check")) {
+                try {
+                    // Safely retrieve the string value
+                    String mood = prefs.getString(key, null);
+                    if (mood != null) {
+                        String timestampStr = key.replace("last_mood_", "");
+                        // Verify timestamp is valid number
+                        long timestamp = Long.parseLong(timestampStr);
+                        
+                        Log.d(TAG, "Uploading mood: " + mood + " at " + timestamp);
+                        // Upload to Firebase Firestore/Realtime Database
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Error syncing mood entry for key " + key + ": " + e.getMessage());
+                }
             }
         }
         
@@ -962,6 +1059,11 @@ public class DashboardActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        
+        // Unregister auth listener
+        if (authStateListener != null) {
+            FirebaseAuth.getInstance().removeAuthStateListener(authStateListener);
+        }
         
         // Unregister receiver to prevent memory leaks
         if (networkChangeReceiver != null) {
@@ -1032,14 +1134,23 @@ public class DashboardActivity extends AppCompatActivity {
         String fontPath = prefs.getString("selected_font", "fonts/Roboto-Regular.ttf");
         
         try {
-            Typeface typeface = Typeface.createFromAsset(getAssets(), fontPath);
-            
-            // Apply font to the root view after layout is inflated
-            View rootView = getWindow().getDecorView().getRootView();
-            applyFontToViews(rootView, typeface);
+            // Check if asset exists to avoid noisy warning
+            boolean assetExists = false;
+            try {
+                java.io.InputStream is = getAssets().open(fontPath);
+                is.close();
+                assetExists = true;
+            } catch (IOException e) {
+                // Asset doesn't exist, ignore
+            }
+
+            if (assetExists) {
+                Typeface typeface = Typeface.createFromAsset(getAssets(), fontPath);
+                View rootView = getWindow().getDecorView().getRootView();
+                applyFontToViews(rootView, typeface);
+            }
         } catch (Exception e) {
-            Log.w(TAG, "Error loading font: " + e.getMessage());
-            // Fall back to default font - no action needed
+            // Log.w(TAG, "Error loading font: " + e.getMessage());
         }
     }
 
@@ -1212,7 +1323,9 @@ public class DashboardActivity extends AppCompatActivity {
 
         // Update UI on main thread
         runOnUiThread(() -> {
-            moodProgress.setIndeterminate(false);
+            if (moodProgress != null) {
+                moodProgress.setIndeterminate(false);
+            }
             updateMoodUI(moodIndex, confidence);
 
             // Show enhanced mood detection dialog instead of toast
@@ -1464,8 +1577,12 @@ public class DashboardActivity extends AppCompatActivity {
         }
 
         // Update UI
-        tvMoodScore.setText(moodEmoji);
-        moodProgress.setProgress(progressValue);
+        if (tvMoodScore != null) {
+            tvMoodScore.setText(moodEmoji);
+        }
+        if (moodProgress != null) {
+            moodProgress.setProgress(progressValue);
+        }
     }
 
     /**
@@ -1582,14 +1699,18 @@ public class DashboardActivity extends AppCompatActivity {
     private void saveDailyCheckIn(float rating, String feelings, boolean sleepIssue,
                                   boolean anxietyIssue, boolean energyIssue) {
         int moodValue = (int)(rating * 20);
-        moodProgress.setProgress(moodValue);
+        if (moodProgress != null) {
+            moodProgress.setProgress(moodValue);
+        }
 
-        if (rating >= 4) {
-            tvMoodScore.setText("😊");
-        } else if (rating >= 3) {
-            tvMoodScore.setText("😐");
-        } else {
-            tvMoodScore.setText("😔");
+        if (tvMoodScore != null) {
+            if (rating >= 4) {
+                tvMoodScore.setText("😊");
+            } else if (rating >= 3) {
+                tvMoodScore.setText("😐");
+            } else {
+                tvMoodScore.setText("😔");
+            }
         }
 
         Toast.makeText(this, "Check-in recorded. Thank you!", Toast.LENGTH_SHORT).show();

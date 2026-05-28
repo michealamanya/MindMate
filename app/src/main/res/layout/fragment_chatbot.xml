@@ -2,73 +2,79 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/background_light"
-    tools:context="micheal.must.signuplogin.fragments.ChatBotFragment">
+    android:background="@color/calm_background">
 
-    <!-- Messages RecyclerView -->
+    <!-- Chat Area -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_chat_messages"
+        android:id="@+id/recycler_view_chat"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:clipToPadding="false"
-        android:overScrollMode="never"/>
+        android:padding="16dp"
+        android:clipToPadding="false" />
 
-    <!-- Progress Bar -->
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:visibility="gone"
-        android:layout_marginBottom="8dp"/>
-
-    <!-- Input Section -->
+    <!-- Loading Spinner -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center_vertical"
+        android:gravity="center"
+        android:padding="16dp"
+        android:background="@color/calm_background">
+
+        <ProgressBar
+            android:id="@+id/loading_spinner"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:visibility="gone"
+            android:indeterminateTint="@color/calm_primary" />
+
+        <TextView
+            android:id="@+id/loading_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Thinking..."
+            android:textSize="14sp"
+            android:textColor="@color/calm_primary"
+            android:layout_marginStart="12dp"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <!-- Input Area -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
         android:padding="12dp"
-        android:background="@color/white"
-        android:elevation="4dp">
+        android:background="#FFFFFF"
+        android:elevation="8dp"
+        android:gravity="center_vertical">
 
         <EditText
-            android:id="@+id/et_chat_input"
+            android:id="@+id/et_message"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="Type your message..."
-            android:textSize="14sp"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:paddingTop="12dp"
-            android:paddingBottom="12dp"
-            android:background="@drawable/chat_input_background"
-            android:textColor="@color/black"
-            android:textColorHint="@color/gray"
-            android:inputType="textMultiLine"
-            android:maxLines="3"
-            android:imeOptions="actionSend"
-            android:layout_marginEnd="8dp"/>
+            android:background="@drawable/bg_rounded_input"
+            android:hint="Type a message..."
+            android:padding="12dp"
+            android:textSize="16sp"
+            android:maxLines="4"
+            android:inputType="textCapSentences|textMultiLine" />
 
-        <ImageButton
-            android:id="@+id/btn_send_message"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:src="@drawable/ic_send"
-            android:contentDescription="Send message"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:scaleType="centerInside"
-            app:tint="@color/primary" />
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btn_send"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:src="@android:drawable/ic_menu_send"
+            app:backgroundTint="@color/calm_primary"
+            app:tint="#FFFFFF"
+            app:fabSize="mini"
+            app:elevation="2dp" />
 
     </LinearLayout>
 

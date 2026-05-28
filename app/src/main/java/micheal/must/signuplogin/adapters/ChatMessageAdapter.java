@@ -1,14 +1,14 @@
 package micheal.must.signuplogin.adapters;
 
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -18,58 +18,105 @@ import java.util.Locale;
 import micheal.must.signuplogin.R;
 import micheal.must.signuplogin.models.ChatMessage;
 
-public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageAdapter.ViewHolder> {
-    private List<ChatMessage> messages;
+public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageAdapter.MessageViewHolder> {
+
+    private static final int VIEW_TYPE_SENT = 1;
+    private static final int VIEW_TYPE_RECEIVED = 2;
+
+    private List<ChatMessage> chatMessages;
     private String currentUserId;
 
-    public ChatMessageAdapter(List<ChatMessage> messages, String currentUserId) {
-        this.messages = messages;
-        this.currentUserId = currentUserId;
+    public ChatMessageAdapter(List<ChatMessage> chatMessages) {
+        this.chatMessages = chatMessages;
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        if (auth.getCurrentUser() != null) {
+            this.currentUserId = auth.getCurrentUser().getUid();
+        } else {
+            this.currentUserId = "";
+        }
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_chat_message, parent, false);
-        return new ViewHolder(view);
+    public MessageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == VIEW_TYPE_SENT) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_message_sent, parent, false);
+            return new SentMessageViewHolder(view);
+        } else {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_message_received, parent, false);
+            return new ReceivedMessageViewHolder(view);
+        }
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        ChatMessage message = messages.get(position);
-
-        holder.tvSenderName.setText(message.getSenderName());
-        holder.tvContent.setText(message.getMessageText());
-
-        // Format timestamp
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
-        String timeText = sdf.format(new Date(message.getTimestamp()));
-        holder.tvTimestamp.setText(timeText);
-
-        // Style message based on sender
-        if (message.getSenderId().equals(currentUserId)) {
-            holder.messageContainer.setBackgroundColor(Color.parseColor("#E3F2FD"));
-        } else {
-            holder.messageContainer.setBackgroundColor(Color.parseColor("#F5F5F5"));
-        }
+    public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
+        ChatMessage message = chatMessages.get(position);
+        holder.bind(message);
     }
 
     @Override
     public int getItemCount() {
-        return messages.size();
+        return chatMessages.size();
     }
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvSenderName, tvContent, tvTimestamp;
-        LinearLayout messageContainer;
-
-        ViewHolder(@NonNull View itemView) {
-            super(itemView);
-            tvSenderName = itemView.findViewById(R.id.tv_sender_name);
-            tvContent = itemView.findViewById(R.id.tv_message_content);
-            tvTimestamp = itemView.findViewById(R.id.tv_message_time);
-            messageContainer = itemView.findViewById(R.id.message_container);
+    @Override
+    public int getItemViewType(int position) {
+        ChatMessage message = chatMessages.get(position);
+        if (message.getSenderId() != null && message.getSenderId().equals(currentUserId)) {
+            return VIEW_TYPE_SENT;
+        } else {
+            return VIEW_TYPE_RECEIVED;
         }
+    }
+
+    abstract static class MessageViewHolder extends RecyclerView.ViewHolder {
+        MessageViewHolder(@NonNull View itemView) {
+            super(itemView);
+        }
+
+        abstract void bind(ChatMessage message);
+    }
+
+    static class SentMessageViewHolder extends MessageViewHolder {
+        TextView tvContent, tvTime;
+
+        SentMessageViewHolder(@NonNull View itemView) {
+            super(itemView);
+            tvContent = itemView.findViewById(R.id.tv_message_content);
+            tvTime = itemView.findViewById(R.id.tv_message_time);
+        }
+
+        @Override
+        void bind(ChatMessage message) {
+            // Fixed: Use getMessage() instead of getMessageText()
+            tvContent.setText(message.getMessage());
+            tvTime.setText(formatTime(message.getTimestamp()));
+        }
+    }
+
+    static class ReceivedMessageViewHolder extends MessageViewHolder {
+        TextView tvContent, tvTime, tvSenderName;
+
+        ReceivedMessageViewHolder(@NonNull View itemView) {
+            super(itemView);
+            tvContent = itemView.findViewById(R.id.tv_message_content);
+            tvTime = itemView.findViewById(R.id.tv_message_time);
+            tvSenderName = itemView.findViewById(R.id.tv_sender_name);
+        }
+
+        @Override
+        void bind(ChatMessage message) {
+            // Fixed: Use getMessage() instead of getMessageText()
+            tvContent.setText(message.getMessage());
+            tvTime.setText(formatTime(message.getTimestamp()));
+            if (tvSenderName != null) {
+                tvSenderName.setText(message.getSenderName());
+            }
+        }
+    }
+
+    private static String formatTime(long timestamp) {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        return sdf.format(new Date(timestamp));
     }
 }

@@ -6,6 +6,9 @@
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="false" />
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -31,7 +34,13 @@
         android:roundIcon="@mipmap/out"
         android:supportsRtl="true"
         android:theme="@style/Theme.SignupLogin"
+        android:enableOnBackInvokedCallback="true"
         tools:targetApi="31">
+
+        <!-- Add Google Play Services version meta-data to fix SecurityException -->
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
 
         <!-- Main and Auth Activities -->
         <activity
@@ -75,7 +84,7 @@
         <activity
             android:name=".GroupChatActivity"
             android:exported="false"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="fullSensor" />
 
         <activity
             android:name=".ResourcesActivity"
@@ -137,13 +146,19 @@
             android:name=".services.MeditationService"
             android:exported="false" />
 
+        <!-- Background Music Service -->
+        <service
+            android:name=".services.BackgroundMusicService"
+            android:exported="false" />
+
         <!-- BroadcastReceiver for network changes -->
         <receiver
             android:name=".receivers.NetworkChangeReceiver"
             android:exported="true"
             android:enabled="true">
             <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"
+                    tools:ignore="BatteryLife" />
             </intent-filter>
         </receiver>
     </application>

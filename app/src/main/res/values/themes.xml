@@ -4,20 +4,24 @@
     <style name="Base.Theme.SignupLogin" parent="Theme.Material3.DayNight.NoActionBar">
 
         <!-- Primary Brand Colors -->
-        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimary">@color/calm_primary</item>
         <item name="colorOnPrimary">@color/white</item>
 
         <!-- Secondary / Accent -->
-        <item name="colorSecondary">@color/accent</item>
+        <item name="colorSecondary">@color/calm_secondary</item>
         <item name="colorOnSecondary">@color/white</item>
 
         <!-- Background -->
-        <item name="android:colorBackground">@color/background_light</item>
-        <item name="colorOnBackground">@color/black</item>
+        <item name="android:colorBackground">@color/calm_background</item>
+        <item name="colorOnBackground">@color/calm_text</item>
 
         <!-- Surface (cards, text fields, etc.) -->
         <item name="colorSurface">@color/white</item>
-        <item name="colorOnSurface">@color/black</item>
+        <item name="colorOnSurface">@color/calm_text</item>
+
+        <!-- Status Bar -->
+        <item name="android:statusBarColor">@color/calm_primary</item>
+        <item name="android:windowLightStatusBar">false</item>
 
         <!-- Error -->
         <item name="colorError">@color/error_red</item>

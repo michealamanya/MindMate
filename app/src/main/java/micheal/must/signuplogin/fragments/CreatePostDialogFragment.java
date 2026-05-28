@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
@@ -29,28 +30,16 @@ public class CreatePostDialogFragment extends DialogFragment {
     private EditText etPostContent;
     private Spinner spinnerGroup;
     private Button btnPost, btnCancel;
-    private PostCreationListener listener;
-
-    // Interface for callback
-    public interface PostCreationListener {
-        void onPostCreated(String content, String group);
-    }
-
-    public void setPostCreationListener(PostCreationListener listener) {
-        this.listener = listener;
-    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Use a style that creates a floating dialog
         setStyle(DialogFragment.STYLE_NORMAL, R.style.DialogStyle);
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // Remove the title bar
         if (getDialog() != null && getDialog().getWindow() != null) {
             getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         }
@@ -61,13 +50,11 @@ public class CreatePostDialogFragment extends DialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Initialize views
         etPostContent = view.findViewById(R.id.et_post_content);
         spinnerGroup = view.findViewById(R.id.spinner_group);
         btnPost = view.findViewById(R.id.btn_post);
         btnCancel = view.findViewById(R.id.btn_cancel);
 
-        // Setup group spinner with sample data
         String[] groups = {"General Discussion", "Anxiety Support", "Meditation Group", "Student Mental Health"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 requireContext(),
@@ -75,12 +62,10 @@ public class CreatePostDialogFragment extends DialogFragment {
                 groups);
         spinnerGroup.setAdapter(adapter);
 
-        // Setup button click listeners
         setupButtonListeners();
     }
 
     private void setupButtonListeners() {
-        // Ensure buttons are properly initialized
         if (btnPost == null || btnCancel == null) {
             Toast.makeText(getContext(), "Error initializing buttons", Toast.LENGTH_SHORT).show();
             return;
@@ -95,12 +80,8 @@ public class CreatePostDialogFragment extends DialogFragment {
             btnPost.setEnabled(false);
 
             String selectedGroup = spinnerGroup.getSelectedItem().toString();
-
-            // Build post object
-            String uid = "anonymous";
-            if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-                uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-            }
+            String uid = FirebaseAuth.getInstance().getCurrentUser() != null ?
+                    FirebaseAuth.getInstance().getCurrentUser().getUid() : "anonymous";
 
             DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("posts").push();
             Map<String, Object> postObj = new HashMap<>();
@@ -111,8 +92,6 @@ public class CreatePostDialogFragment extends DialogFragment {
 
             ref.setValue(postObj)
                 .addOnSuccessListener(aVoid -> {
-                    // notify local listener if needed
-                    if (listener != null) listener.onPostCreated(content, selectedGroup);
                     Toast.makeText(getContext(), "Post created successfully", Toast.LENGTH_SHORT).show();
                     dismiss();
                 })
@@ -128,7 +107,6 @@ public class CreatePostDialogFragment extends DialogFragment {
     @Override
     public void onStart() {
         super.onStart();
-        // Make dialog width match parent
         if (getDialog() != null && getDialog().getWindow() != null) {
             getDialog().getWindow().setLayout(
                     ViewGroup.LayoutParams.MATCH_PARENT,

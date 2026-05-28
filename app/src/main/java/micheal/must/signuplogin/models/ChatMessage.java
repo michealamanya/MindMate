@@ -3,38 +3,76 @@ package micheal.must.signuplogin.models;
 public class ChatMessage {
     private String messageId;
     private String senderId;
-    private String senderName;
-    private String messageText;
+    private String message;
     private long timestamp;
-    private String groupId;
+    private String senderName;
+    private boolean isUser; // For AI Chat
 
     public ChatMessage() {
+        // Default constructor required for calls to DataSnapshot.getValue(ChatMessage.class)
     }
 
-    public ChatMessage(String senderId, String senderName, String messageText, long timestamp, String groupId) {
+    // Constructor for Group Chat
+    public ChatMessage(String messageId, String senderId, String message, long timestamp, String senderName) {
+        this.messageId = messageId;
         this.senderId = senderId;
-        this.senderName = senderName;
-        this.messageText = messageText;
+        this.message = message;
         this.timestamp = timestamp;
-        this.groupId = groupId;
+        this.senderName = senderName;
     }
 
-    // Getters and Setters
-    public String getMessageId() { return messageId; }
-    public void setMessageId(String messageId) { this.messageId = messageId; }
+    // Constructor for AI Chat
+    public ChatMessage(String message, boolean isUser, long timestamp) {
+        this.message = message;
+        this.isUser = isUser;
+        this.timestamp = timestamp;
+    }
 
-    public String getSenderId() { return senderId; }
-    public void setSenderId(String senderId) { this.senderId = senderId; }
+    public String getMessageId() {
+        return messageId;
+    }
 
-    public String getSenderName() { return senderName; }
-    public void setSenderName(String senderName) { this.senderName = senderName; }
+    public void setMessageId(String messageId) {
+        this.messageId = messageId;
+    }
 
-    public String getMessageText() { return messageText; }
-    public void setMessageText(String messageText) { this.messageText = messageText; }
+    public String getSenderId() {
+        return senderId;
+    }
 
-    public long getTimestamp() { return timestamp; }
-    public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
+    public void setSenderId(String senderId) {
+        this.senderId = senderId;
+    }
 
-    public String getGroupId() { return groupId; }
-    public void setGroupId(String groupId) { this.groupId = groupId; }
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getSenderName() {
+        return senderName;
+    }
+
+    public void setSenderName(String senderName) {
+        this.senderName = senderName;
+    }
+
+    public boolean isUser() {
+        return isUser;
+    }
+
+    public void setUser(boolean user) {
+        isUser = user;
+    }
 }
