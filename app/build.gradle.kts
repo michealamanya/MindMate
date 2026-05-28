@@ -3,6 +3,18 @@ plugins {
     alias(libs.plugins.google.gms.google.services)
 }
 
+// Load local.properties to read non-committed secrets like API keys.
+val localProperties = java.util.Properties().apply {
+    val localPropsFile = rootProject.file("local.properties")
+    if (localPropsFile.exists()) {
+        localPropsFile.inputStream().use { load(it) }
+    }
+}
+
+// Prefer HF_API_KEY from local.properties, fallback to environment variable.
+val hfApiKey: String = localProperties.getProperty("HF_API_KEY")
+    ?: System.getenv("HF_API_KEY")
+    ?: ""
 android {
     namespace = "micheal.must.signuplogin"
     compileSdk = 36
@@ -15,6 +27,8 @@ android {
         versionName = "1.10.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Expose HF API key to the app at build time (do NOT commit local.properties)
+        buildConfigField("String", "HF_API_KEY", "\"$hfApiKey\"")
     }
 
     signingConfigs {
